@@ -1,39 +1,29 @@
-#################################
-# Unreal Engine Generated Files #
-#################################
-/[Bb]uild
-/[Bb]uilds
-/Binaries
-/DerivedDataCache
-/Intermediate
-/Saved
-
-#################################
-# Visual Studio Generated Files #
-#################################
-# Cache Directory
-.vs
-# User Specific Files
-*.rsuser
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-# CPP Cache Files
-*.VC.db
-*.opendb
-*.opensdf
-*.sdf
-# Solution Files
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+UserSettings/
+MemoryCaptures/
+*.csproj
+*.unityproj
 *.sln
-# VSCode Cache Directory
-.vscode
-# VSCode History Files
-**/.history
-
-#################################
-# Miscellaneous Generated Files #
-#################################
-# ADD AS NEED BE
-
+*.user
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+sysinfo.txt
+*.apk
+*.aab
+*.app
+*.xcworkspace/
+*.xcuserstate
 .DS_Store
