@@ -7,7 +7,6 @@ public class GameController : MonoBehaviour
     public GameObject interactionHandler;
     private IInteraction _interactionHandler;
 
-    // Start is called before the first frame update
     void Start()
     {
         if (interactionHandler == null || interactionHandler.GetComponent<IInteraction>() == null)
@@ -19,7 +18,6 @@ public class GameController : MonoBehaviour
         _interactionHandler = interactionHandler.GetComponent<IInteraction>();
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (_interactionHandler.TryGetInteraction(out InteractionEvent e)) {

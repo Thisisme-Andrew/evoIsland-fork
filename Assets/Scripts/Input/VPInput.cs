@@ -1,5 +1,9 @@
+using Unity.PolySpatial.InputDevices;
 using UnityEngine;
+using UnityEngine.InputSystem.EnhancedTouch;
+using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.XR;
+using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 public class VPInput : MonoBehaviour, IInteraction
 {
@@ -11,8 +15,23 @@ public class VPInput : MonoBehaviour, IInteraction
     private float holdTime;
     private const float HoldThreshold = 0.3f;
 
+    void OnEnable()
+    {
+        EnhancedTouchSupport.Enable();
+    }
+
     public bool TryGetInteraction(out InteractionEvent e)
     {
+        var activeTouches = Touch.activeTouches;
+        if (activeTouches.Count <= 0)
+        {
+            isGrabbing = false;
+            holdTime = 0;
+            e = default;
+            e.type = InteractionType.None;
+            return false;
+        }
+
         e = default;
         e.type = InteractionType.None;
 
@@ -44,31 +63,32 @@ public class VPInput : MonoBehaviour, IInteraction
         e.hitPoint = hitPoint;
 
         // 3. Detect pinch gesture state
-        // TODO: replace with actual
-        bool pinchDown = VisionGestureAPI.PinchStarted;
-        bool pinchHeld = VisionGestureAPI.PinchHeld;
-        bool pinchReleased = VisionGestureAPI.PinchEnded;
+        SpatialPointerState primaryTouchData = EnhancedSpatialPointerSupport
+            .GetPointerState(activeTouches[0]);
+        SpatialPointerKind interactionKind = primaryTouchData.Kind;
 
-        if (pinchDown)
+        if (interactionKind == SpatialPointerKind.DirectPinch)
         {
-            holdTime = 0;
-            e.type = InteractionType.Tap;
-            isGrabbing = false;
-            return true;
-        }
-
-        if (pinchHeld)
-        {
-            holdTime += Time.deltaTime;
-            if (holdTime >= HoldThreshold)
+            if (!isGrabbing)
             {
-                e.type = InteractionType.Hold;
+                holdTime = 0;
+                e.type = InteractionType.Tap;
                 isGrabbing = true;
                 return true;
             }
         }
 
-        if (pinchReleased && isGrabbing)
+        if (isGrabbing)
+        {
+            holdTime += Time.deltaTime;
+            if (holdTime >= HoldThreshold)
+            {
+                e.type = InteractionType.Hold;
+                return true;
+            }
+        }
+
+        if (interactionKind != SpatialPointerKind.DirectPinch && isGrabbing)
         {
             e.type = InteractionType.Release;
             isGrabbing = false;
@@ -79,9 +99,3 @@ public class VPInput : MonoBehaviour, IInteraction
     }
 }
 
-public static class VisionGestureAPI
-{
-    public static bool PinchStarted => false;
-    public static bool PinchHeld => false;
-    public static bool PinchEnded => false;
-}
