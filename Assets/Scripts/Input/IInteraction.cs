@@ -9,7 +9,7 @@ public enum InteractionType {
 
 public struct InteractionEvent {
     public InteractionType type;
-    public Ray gazeRay;
+    public Ray ray;
     public Vector3? hitPoint;
     public Tile targetTile;
 }
