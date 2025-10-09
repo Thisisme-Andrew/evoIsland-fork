@@ -18,6 +18,8 @@ public class Plane
     public void MergeFrom(Plane other)
     {
         spawnedObjects.AddRange(other.spawnedObjects);
-        // optionally merge other metadata
+        color = Color.Lerp(color, other.color, 0.5f); // Average the colors
+        creationTime = Mathf.Min(creationTime, other.creationTime);
+        // Optionally merge other metadata
     }
 }

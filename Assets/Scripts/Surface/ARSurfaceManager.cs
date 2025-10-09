@@ -81,9 +81,9 @@ public class ARSurfaceManager : MonoBehaviour
             ARSurface existingSurface = planeObj?.surfaceInfo as ARSurface;
             if (existingSurface != null)
             {
-                registry.Remove(existingSurface);
+                registry.RemoveAndMerge(existingSurface);
 
-                Debug.Log("Surface removed at " + plane.transform.position);
+                Debug.Log("Surface removed and merged at " + plane.transform.position);
             }
 
             // Remove debug plane
