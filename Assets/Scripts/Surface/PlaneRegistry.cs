@@ -8,13 +8,17 @@ public class PlaneRegistry<T> where T : IDetectedSurface
     public void Add(T surface)
     {
         if (!surfaces.ContainsKey(surface.Id))
+        {
+            Debug.Log($"Adding new surface {surface.Id} at {surface.Center}");
             surfaces[surface.Id] = new Plane(surface);
+        }
     }
 
     public void Remove(T surface)
     {
         if (surfaces.TryGetValue(surface.Id, out var data))
         {
+            Debug.Log($"Removing surface {surface.Id}");
             // optionally transfer data to nearby surface if needed
             surfaces.Remove(surface.Id);
         }

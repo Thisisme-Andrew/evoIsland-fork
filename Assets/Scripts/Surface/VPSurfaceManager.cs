@@ -9,7 +9,7 @@ public class VPSurfaceManager : MonoBehaviour
 {
     private XRMeshSubsystem meshSubsystem;
 
-    public PlaneRegistry<VPSurface> registry;
+    public PlaneRegistry<VPSurface> registry = new PlaneRegistry<VPSurface>();
 
     void Start()
     {

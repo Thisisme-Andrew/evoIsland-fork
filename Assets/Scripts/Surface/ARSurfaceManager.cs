@@ -7,7 +7,7 @@ public class ARSurfaceManager : MonoBehaviour
 {
     public ARPlaneManager planeManager;
 
-    public PlaneRegistry<ARSurface> registry;
+    public PlaneRegistry<ARSurface> registry = new PlaneRegistry<ARSurface>();
 
     // Start is called before the first frame update
     void Start()
