@@ -17,12 +17,12 @@ public class VPSurfaceManager : MonoBehaviour
         meshSubsystem = GetMeshSubsystem();
         if (meshSubsystem == null)
         {
-            Debug.LogError("XRMeshSubsystem not found. Ensure it is properly configured.");
+            Debug.LogError("[VPSurfaceManager] XRMeshSubsystem not found. Ensure it is properly configured.");
             return;
         }
 
         registry = new PlaneRegistry<VPSurface>();
-        Debug.Log("VPSurfaceManager initialized on VisionOS.");
+        Debug.Log("[VPSurfaceManager] initialized on VisionOS.");
     }
 
     XRMeshSubsystem GetMeshSubsystem()
@@ -72,7 +72,7 @@ public class VPSurfaceManager : MonoBehaviour
                 anchor.transform.position = result.Position;
                 anchor.transform.rotation = result.Rotation;
 
-                Debug.Log("Surface added at " + result.Position);
+                Debug.Log("[VPSurfaceManager] Surface added at " + result.Position);
 
                 // Spawn debug plane if prefab is set
                 if (debugPlanePrefab != null)
@@ -96,7 +96,7 @@ public class VPSurfaceManager : MonoBehaviour
                 if (result.Status == MeshGenerationStatus.Success)
                 {
                     existingSurface.Update(result.Mesh, result.Position, result.Rotation);
-                    Debug.Log("Surface updated at " + result.Position);
+                    Debug.Log("[VPSurfaceManager] Surface updated at " + result.Position);
 
                     // Update debug plane position
                     if (debugPlanes.ContainsKey(meshInfo.MeshId))
@@ -116,8 +116,8 @@ public class VPSurfaceManager : MonoBehaviour
         VPSurface existingSurface = planeObj?.surfaceInfo as VPSurface;
         if (existingSurface != null)
         {
-            registry.Remove(existingSurface);
-            Debug.Log("Surface removed with MeshId: " + meshInfo.MeshId);
+            registry.RemoveAndMerge(existingSurface);
+            Debug.Log("[VPSurfaceManager] Surface removed and merged with MeshId: " + meshInfo.MeshId);
 
             // Remove debug plane
             if (debugPlanes.ContainsKey(meshInfo.MeshId))

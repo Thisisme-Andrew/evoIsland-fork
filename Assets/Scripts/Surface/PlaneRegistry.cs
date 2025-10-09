@@ -9,7 +9,7 @@ public class PlaneRegistry<T> where T : IDetectedSurface
     {
         if (!surfaces.ContainsKey(surface.Id))
         {
-            Debug.Log($"Adding new surface {surface.Id} at {surface.Center}");
+            Debug.Log($"[PlaneRegistry] Adding new surface {surface.Id} at {surface.Center}");
             surfaces[surface.Id] = new Plane(surface);
         }
     }
@@ -18,7 +18,7 @@ public class PlaneRegistry<T> where T : IDetectedSurface
     {
         if (surfaces.TryGetValue(surface.Id, out var data))
         {
-            Debug.Log($"Removing surface {surface.Id}");
+            Debug.Log($"[PlaneRegistry] Removing surface {surface.Id}");
             // optionally transfer data to nearby surface if needed
             surfaces.Remove(surface.Id);
         }
@@ -52,7 +52,7 @@ public class PlaneRegistry<T> where T : IDetectedSurface
             }
 
             surfaces.Remove(surface.Id);
-            Debug.Log($"Removed and merged surface {surface.Id}");
+            Debug.Log($"[PlaneRegistry] Removed and merged surface {surface.Id}");
         }
     }
 

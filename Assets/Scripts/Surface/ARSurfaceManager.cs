@@ -20,12 +20,12 @@ public class ARSurfaceManager : MonoBehaviour
         planeManager = FindObjectOfType<ARPlaneManager>();
         if (planeManager == null)
         {
-            Debug.LogError("ARPlaneManager not found. Ensure it is added to the ARSessionOrigin GameObject.");
+            Debug.LogError("[ARSurfaceManager] ARPlaneManager not found. Ensure it is added to the ARSessionOrigin GameObject.");
             return;
         }
         planeManager.planesChanged += OnPlanesChanged;
 
-        Debug.Log("ARSurfaceManager initialized on iOS with ARKit.");
+        Debug.Log("[ARSurfaceManager] ARSurfaceManager initialized on iOS with ARKit.");
     }
 
     // Update is called once per frame
@@ -43,7 +43,7 @@ public class ARSurfaceManager : MonoBehaviour
 
             registry.Add(arSurface);
 
-            Debug.Log("Surface added at " + plane.transform.position);
+            Debug.Log("[ARSurfaceManager] Surface added at " + plane.transform.position);
 
             // Spawn debug plane if prefab is set
             if (debugPlanePrefab != null)
@@ -62,7 +62,7 @@ public class ARSurfaceManager : MonoBehaviour
             {
                 existingSurface.Update(plane);
 
-                Debug.Log("Surface updated at " + plane.transform.position);
+                Debug.Log("[ARSurfaceManager] Surface updated at " + plane.transform.position);
             }
 
             // Update debug plane position
@@ -83,7 +83,7 @@ public class ARSurfaceManager : MonoBehaviour
             {
                 registry.RemoveAndMerge(existingSurface);
 
-                Debug.Log("Surface removed and merged at " + plane.transform.position);
+                Debug.Log("[ARSurfaceManager] Surface removed and merged at " + plane.transform.position);
             }
 
             // Remove debug plane
