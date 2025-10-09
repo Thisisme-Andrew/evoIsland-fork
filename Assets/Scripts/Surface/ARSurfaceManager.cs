@@ -14,18 +14,22 @@ public class ARSurfaceManager : MonoBehaviour
 
     private Dictionary<TrackableId, GameObject> debugPlanes = new Dictionary<TrackableId, GameObject>();
 
+    private MLogger logger = MLogger.GetLogger("ARSurfaceManager");
+
     // Start is called before the first frame update
     void Start()
     {
+        logger.Enable(false);
+
         planeManager = FindObjectOfType<ARPlaneManager>();
         if (planeManager == null)
         {
-            Debug.LogError("[ARSurfaceManager] ARPlaneManager not found. Ensure it is added to the ARSessionOrigin GameObject.");
+            logger.Info("ARPlaneManager not found. Ensure it is added to the ARSessionOrigin GameObject.");
             return;
         }
         planeManager.planesChanged += OnPlanesChanged;
 
-        Debug.Log("[ARSurfaceManager] ARSurfaceManager initialized on iOS with ARKit.");
+        logger.Info("ARSurfaceManager initialized on iOS with ARKit.");
     }
 
     // Update is called once per frame
@@ -43,7 +47,7 @@ public class ARSurfaceManager : MonoBehaviour
 
             registry.Add(arSurface);
 
-            Debug.Log("[ARSurfaceManager] Surface added at " + plane.transform.position);
+            logger.Info("Surface added at " + plane.transform.position);
 
             // Spawn debug plane if prefab is set
             if (debugPlanePrefab != null)
@@ -62,7 +66,7 @@ public class ARSurfaceManager : MonoBehaviour
             {
                 existingSurface.Update(plane);
 
-                Debug.Log("[ARSurfaceManager] Surface updated at " + plane.transform.position);
+                logger.Info("Surface updated at " + plane.transform.position);
             }
 
             // Update debug plane position
@@ -83,7 +87,7 @@ public class ARSurfaceManager : MonoBehaviour
             {
                 registry.RemoveAndMerge(existingSurface);
 
-                Debug.Log("[ARSurfaceManager] Surface removed and merged at " + plane.transform.position);
+                logger.Info("Surface removed and merged at " + plane.transform.position);
             }
 
             // Remove debug plane

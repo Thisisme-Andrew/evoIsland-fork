@@ -4,12 +4,17 @@ using UnityEngine;
 public class PlaneRegistry<T> where T : IDetectedSurface
 {
     private Dictionary<string, Plane> surfaces = new();
+    private MLogger logger = MLogger.GetLogger("PlaneRegistry");
+
+    public PlaneRegistry()
+    {
+    }
 
     public void Add(T surface)
     {
         if (!surfaces.ContainsKey(surface.Id))
         {
-            Debug.Log($"[PlaneRegistry] Adding new surface {surface.Id} at {surface.Center}");
+            logger.Info($"Adding new surface {surface.Id} at {surface.Center}");
             surfaces[surface.Id] = new Plane(surface);
         }
     }
@@ -18,7 +23,7 @@ public class PlaneRegistry<T> where T : IDetectedSurface
     {
         if (surfaces.TryGetValue(surface.Id, out var data))
         {
-            Debug.Log($"[PlaneRegistry] Removing surface {surface.Id}");
+            logger.Info($"Removing surface {surface.Id}");
             // optionally transfer data to nearby surface if needed
             surfaces.Remove(surface.Id);
         }
@@ -52,7 +57,7 @@ public class PlaneRegistry<T> where T : IDetectedSurface
             }
 
             surfaces.Remove(surface.Id);
-            Debug.Log($"[PlaneRegistry] Removed and merged surface {surface.Id}");
+            logger.Info($"Removed and merged surface {surface.Id}");
         }
     }
 

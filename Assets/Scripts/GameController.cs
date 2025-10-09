@@ -7,6 +7,8 @@ public class GameController : MonoBehaviour
     public GameObject interactionHandler;
     private IInteraction _interactionHandler;
 
+    private MLogger logger = MLogger.GetLogger("GameController");
+
     void Start()
     {
         if (interactionHandler == null || interactionHandler.GetComponent<IInteraction>() == null)
@@ -30,6 +32,7 @@ public class GameController : MonoBehaviour
         switch (e.type)
         {
             case InteractionType.Tap:
+                logger.Info("Tap interaction detected");
                 if (e.targetTile == null && e.hitPoint.HasValue)
                 {
                     Signal.Emit("SpawnTile", e.hitPoint.Value);
@@ -41,13 +44,14 @@ public class GameController : MonoBehaviour
                 break;
 
             case InteractionType.Hold:
-                if (e.targetTile != null)
+                if (e.targetTile != null && e.hitPoint.HasValue)
                 {
-                    Signal.Emit("DragTile", e.targetTile);
+                    Signal.Emit("DragTile", (e.targetTile, e.hitPoint.Value));
                 }
                 break;
 
             case InteractionType.Release:
+                logger.Info("Release interaction detected");
                 Signal.Emit("ReleaseTile", e.targetTile);
                 break;
         }
