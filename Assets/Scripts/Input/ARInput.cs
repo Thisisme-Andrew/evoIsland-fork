@@ -48,6 +48,11 @@ public class ARInput : MonoBehaviour, IInteraction
             {
                 hitPoint = hit.point;
             }
+            else
+            {
+                logger.Info("Raycast did not hit anything");
+                return false;
+            }
 
             e.targetTile = hitTile;
             e.hitPoint = hitPoint;
@@ -109,6 +114,7 @@ public class ARInput : MonoBehaviour, IInteraction
                 else
                 {
                     logger.Info("Raycast did not hit anything");
+                    return false;
                 }
 
                 e.targetTile = hitTile;

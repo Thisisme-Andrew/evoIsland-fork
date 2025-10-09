@@ -15,13 +15,17 @@ public class VPInput : MonoBehaviour, IInteraction
     private float holdTime;
     private const float HoldThreshold = 0.3f;
 
+    private MLogger logger = MLogger.GetLogger("VPInput");
+
     void OnEnable()
     {
         EnhancedTouchSupport.Enable();
+        logger.Info("EnhancedTouchSupport enabled");
     }
 
     public bool TryGetInteraction(out InteractionEvent e)
     {
+        logger.Info("Attempting to get interaction");
         var activeTouches = Touch.activeTouches;
         if (activeTouches.Count <= 0)
         {
@@ -58,6 +62,11 @@ public class VPInput : MonoBehaviour, IInteraction
         {
             hitPoint = hit.point;
         }
+        else
+        {
+            logger.Info("Raycast did not hit anything");
+            return false;
+        }
 
         e.targetTile = hitTile;
         e.hitPoint = hitPoint;
@@ -69,6 +78,7 @@ public class VPInput : MonoBehaviour, IInteraction
 
         if (interactionKind == SpatialPointerKind.DirectPinch)
         {
+            logger.Info("Detected pinch gesture state: DirectPinch");
             if (!isGrabbing)
             {
                 holdTime = 0;
@@ -84,6 +94,7 @@ public class VPInput : MonoBehaviour, IInteraction
             if (holdTime >= HoldThreshold)
             {
                 e.type = InteractionType.Hold;
+                logger.Info("Hold threshold reached");
                 return true;
             }
         }
@@ -92,6 +103,7 @@ public class VPInput : MonoBehaviour, IInteraction
         {
             e.type = InteractionType.Release;
             isGrabbing = false;
+            logger.Info("Interaction type set to Release");
             return true;
         }
 
