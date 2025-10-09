@@ -4,15 +4,27 @@
 
 There are three ways to run the project:
 1. In a virtual AR environment on a Desktop device (Windows 11, macOS)
-2. On an iOS device with AR support
-3. On an Apple Vision Pro
+2. In a virtual HMD environment on a Desktop device (Windows 11, macOS)
+3. On an iOS device with AR support
+4. On an Apple Vision Pro
 
-### Running on Desktop
+### Running on Desktop with AR simulation
 
 1. In Unity, click File > Build Settings
 2. Click "Windows, Mac, Linux", then click "Switch Platform" on the bottom-right
 3. Ensure that only "ARScene" is added to the scenes to build
-4. Exit the dialog, then click on the Run button
+4. Exit the dialog
+5. Open the ARScene file
+6. Click on the Run button
+
+### Running on Desktop with HMD simultion
+
+1. In Unity, click File > Build Settings
+2. Click "Windows, Mac, Linux", then click "Switch Platform" on the bottom-right
+3. Ensure that only "VRScene" is added to the scenes to build
+4. Exit the dialog
+5. Open the VPScene file
+6. Click on the Run button
 
 ### Running on iOS
 
