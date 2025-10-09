@@ -28,3 +28,4 @@ sysinfo.txt
 *.xcuserstate
 .DS_Store
 .vscode/
+ios/
