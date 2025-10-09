@@ -1,5 +1,3 @@
-#if UNITY_VISIONOS
-
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
@@ -10,6 +8,9 @@ public class VPSurfaceManager : MonoBehaviour
     private XRMeshSubsystem meshSubsystem;
 
     public PlaneRegistry<VPSurface> registry = new PlaneRegistry<VPSurface>();
+
+    public GameObject debugPlanePrefab;
+    private Dictionary<MeshId, GameObject> debugPlanes = new Dictionary<MeshId, GameObject>();
 
     void Start()
     {
@@ -70,16 +71,24 @@ public class VPSurfaceManager : MonoBehaviour
                 var anchor = new GameObject("Anchor");
                 anchor.transform.position = result.Position;
                 anchor.transform.rotation = result.Rotation;
-                obj.transform.SetParent(anchor.transform);
 
                 Debug.Log("Surface added at " + result.Position);
+
+                // Spawn debug plane if prefab is set
+                if (debugPlanePrefab != null)
+                {
+                    GameObject debugPlane = Instantiate(debugPlanePrefab, result.Position, result.Rotation);
+                    debugPlanes[meshInfo.MeshId] = debugPlane;
+                }
             }
         });
     }
 
     private void HandleUpdatedMesh(MeshInfo meshInfo)
     {
-        if (registry.Get(meshInfo.MeshId.ToString()) is VPSurface existingSurface)
+        var planeObj = registry.Get(meshInfo.MeshId.ToString());
+        VPSurface existingSurface = planeObj?.surfaceInfo as VPSurface;
+        if (existingSurface != null)
         {
             Mesh mesh = new();
             meshSubsystem.GenerateMeshAsync(meshInfo.MeshId, mesh, null, MeshVertexAttributes.None, (MeshGenerationResult result) =>
@@ -88,6 +97,14 @@ public class VPSurfaceManager : MonoBehaviour
                 {
                     existingSurface.Update(result.Mesh, result.Position, result.Rotation);
                     Debug.Log("Surface updated at " + result.Position);
+
+                    // Update debug plane position
+                    if (debugPlanes.ContainsKey(meshInfo.MeshId))
+                    {
+                        GameObject debugPlane = debugPlanes[meshInfo.MeshId];
+                        debugPlane.transform.position = result.Position;
+                        debugPlane.transform.rotation = result.Rotation;
+                    }
                 }
             });
         }
@@ -95,12 +112,20 @@ public class VPSurfaceManager : MonoBehaviour
 
     private void HandleRemovedMesh(MeshInfo meshInfo)
     {
-        if (registry.Get(meshInfo.MeshId.ToString()) is VPSurface existingSurface)
+        var planeObj = registry.Get(meshInfo.MeshId.ToString());
+        VPSurface existingSurface = planeObj?.surfaceInfo as VPSurface;
+        if (existingSurface != null)
         {
             registry.Remove(existingSurface);
             Debug.Log("Surface removed with MeshId: " + meshInfo.MeshId);
+
+            // Remove debug plane
+            if (debugPlanes.ContainsKey(meshInfo.MeshId))
+            {
+                GameObject debugPlane = debugPlanes[meshInfo.MeshId];
+                Destroy(debugPlane);
+                debugPlanes.Remove(meshInfo.MeshId);
+            }
         }
     }
 }
-
-#endif

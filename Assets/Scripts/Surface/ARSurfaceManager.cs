@@ -2,12 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
+using UnityEngine.XR.ARSubsystems; // Added to resolve TrackableId namespace
 
 public class ARSurfaceManager : MonoBehaviour
 {
     public ARPlaneManager planeManager;
 
     public PlaneRegistry<ARSurface> registry = new PlaneRegistry<ARSurface>();
+
+    public GameObject debugPlanePrefab;
+
+    private Dictionary<TrackableId, GameObject> debugPlanes = new Dictionary<TrackableId, GameObject>();
 
     // Start is called before the first frame update
     void Start()
@@ -39,6 +44,13 @@ public class ARSurfaceManager : MonoBehaviour
             registry.Add(arSurface);
 
             Debug.Log("Surface added at " + plane.transform.position);
+
+            // Spawn debug plane if prefab is set
+            if (debugPlanePrefab != null)
+            {
+                GameObject debugPlane = Instantiate(debugPlanePrefab, plane.transform.position, plane.transform.rotation);
+                debugPlanes[plane.trackableId] = debugPlane;
+            }
         }
 
         // Handle updated planes
@@ -52,6 +64,14 @@ public class ARSurfaceManager : MonoBehaviour
 
                 Debug.Log("Surface updated at " + plane.transform.position);
             }
+
+            // Update debug plane position
+            if (debugPlanes.ContainsKey(plane.trackableId))
+            {
+                GameObject debugPlane = debugPlanes[plane.trackableId];
+                debugPlane.transform.position = plane.transform.position;
+                debugPlane.transform.rotation = plane.transform.rotation;
+            }
         }
 
         // Handle removed planes
@@ -64,6 +84,14 @@ public class ARSurfaceManager : MonoBehaviour
                 registry.Remove(existingSurface);
 
                 Debug.Log("Surface removed at " + plane.transform.position);
+            }
+
+            // Remove debug plane
+            if (debugPlanes.ContainsKey(plane.trackableId))
+            {
+                GameObject debugPlane = debugPlanes[plane.trackableId];
+                Destroy(debugPlane);
+                debugPlanes.Remove(plane.trackableId);
             }
         }
     }
