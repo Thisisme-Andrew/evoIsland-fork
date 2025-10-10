@@ -4,18 +4,23 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
-    public IInteraction interactionHandler;
+    public GameObject interactionHandler;
+    private IInteraction _interactionHandler;
 
-    // Start is called before the first frame update
     void Start()
     {
-        
+        if (interactionHandler == null || interactionHandler.GetComponent<IInteraction>() == null)
+        {
+            Debug.LogError("Interaction handler not set or does not implement IInteraction.");
+            enabled = false;
+            return;
+        }
+        _interactionHandler = interactionHandler.GetComponent<IInteraction>();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if (interactionHandler.TryGetInteraction(out InteractionEvent e)) {
+        if (_interactionHandler.TryGetInteraction(out InteractionEvent e)) {
             HandleInteraction(e);
         }
     }

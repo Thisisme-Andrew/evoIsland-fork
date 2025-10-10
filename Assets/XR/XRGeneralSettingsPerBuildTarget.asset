@@ -15,7 +15,40 @@ MonoBehaviour:
   m_RequiresSettingsUpdate: 0
   m_AutomaticLoading: 0
   m_AutomaticRunning: 0
-  m_Loaders: []
+  m_Loaders:
+  - {fileID: 11400000, guid: a1445d0f09d2147ca8b2bee0a1b79a48, type: 2}
+  - {fileID: 11400000, guid: 319f356da707442f7888da91b84daaa2, type: 2}
+--- !u!114 &-2217668822685561704
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d236b7d11115f2143951f1e14045df39, type: 3}
+  m_Name: iPhone Settings
+  m_EditorClassIdentifier: 
+  m_LoaderManagerInstance: {fileID: -1699336094531603280}
+  m_InitManagerOnStart: 1
+--- !u!114 &-1699336094531603280
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4c3631f5e58749a59194e0cf6baf6d5, type: 3}
+  m_Name: iPhone Providers
+  m_EditorClassIdentifier: 
+  m_RequiresSettingsUpdate: 0
+  m_AutomaticLoading: 0
+  m_AutomaticRunning: 0
+  m_Loaders:
+  - {fileID: 11400000, guid: a1b7a676547864563ad2a1b4fff6f1ff, type: 2}
 --- !u!114 &-1634086301646033530
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -45,10 +78,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2dc886499c26824283350fa532d087d, type: 3}
   m_Name: XRGeneralSettingsPerBuildTarget
   m_EditorClassIdentifier: 
-  Keys: 0100000024000000
+  Keys: 010000002400000004000000
   Values:
   - {fileID: 6501763917629734691}
   - {fileID: 7028968566422431223}
+  - {fileID: -2217668822685561704}
 --- !u!114 &6501763917629734691
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -12,6 +12,8 @@ TagManager:
   - Water
   - UI
   - 
+  - Surface
+  - Tile
   - 
   - 
   - 
@@ -33,9 +35,7 @@ TagManager:
   - 
   - 
   - 
-  - 
-  - 
-  - 
+  - XR Simulation
   - PolySpatial
   m_SortingLayers:
   - name: Default
