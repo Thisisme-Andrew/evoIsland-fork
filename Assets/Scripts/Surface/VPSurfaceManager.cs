@@ -7,7 +7,7 @@ public class VPSurfaceManager : MonoBehaviour
 {
     private XRMeshSubsystem meshSubsystem;
 
-    public PlaneRegistry<VPSurface> registry = new PlaneRegistry<VPSurface>();
+    public PlaneRegistry registry = new PlaneRegistry();
 
     public GameObject debugPlanePrefab;
     private Dictionary<MeshId, GameObject> debugPlanes = new Dictionary<MeshId, GameObject>();
@@ -23,7 +23,6 @@ public class VPSurfaceManager : MonoBehaviour
             return;
         }
 
-        registry = new PlaneRegistry<VPSurface>();
         logger.Info("initialized on VisionOS.");
     }
 
@@ -79,7 +78,13 @@ public class VPSurfaceManager : MonoBehaviour
                 // Spawn debug plane if prefab is set
                 if (debugPlanePrefab != null)
                 {
+                    // TODO: Adapt to mesh shape rather than flat plane
                     GameObject debugPlane = Instantiate(debugPlanePrefab, result.Position, result.Rotation);
+
+                    // Adjust the scale of the debug plane to match the mesh bounds
+                    Vector3 meshSize = result.Mesh.bounds.size;
+                    debugPlane.transform.localScale = new Vector3(meshSize.x, 1, meshSize.z);
+
                     debugPlanes[meshInfo.MeshId] = debugPlane;
                 }
             }
@@ -100,12 +105,16 @@ public class VPSurfaceManager : MonoBehaviour
                     existingSurface.Update(result.Mesh, result.Position, result.Rotation);
                     logger.Info("Surface updated at " + result.Position);
 
-                    // Update debug plane position
+                    // Update debug plane position and scale
                     if (debugPlanes.ContainsKey(meshInfo.MeshId))
                     {
                         GameObject debugPlane = debugPlanes[meshInfo.MeshId];
                         debugPlane.transform.position = result.Position;
                         debugPlane.transform.rotation = result.Rotation;
+
+                        // Adjust the scale of the debug plane to match the updated mesh bounds
+                        Vector3 meshSize = result.Mesh.bounds.size;
+                        debugPlane.transform.localScale = new Vector3(meshSize.x, 1, meshSize.z);
                     }
                 }
             });

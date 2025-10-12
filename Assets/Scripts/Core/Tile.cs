@@ -1,4 +1,6 @@
 using UnityEngine;
 
-public class Tile : MonoBehaviour {
+public class Tile
+{
+    public Plane plane;
 }

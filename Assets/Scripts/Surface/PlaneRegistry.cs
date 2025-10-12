@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlaneRegistry<T> where T : IDetectedSurface
+public class PlaneRegistry : MonoBehaviour
 {
     private Dictionary<string, Plane> surfaces = new();
     private MLogger logger = MLogger.GetLogger("PlaneRegistry");
@@ -10,7 +10,7 @@ public class PlaneRegistry<T> where T : IDetectedSurface
     {
     }
 
-    public void Add(T surface)
+    public void Add(IDetectedSurface surface)
     {
         if (!surfaces.ContainsKey(surface.Id))
         {
@@ -19,7 +19,7 @@ public class PlaneRegistry<T> where T : IDetectedSurface
         }
     }
 
-    public void Remove(T surface)
+    public void Remove(IDetectedSurface surface)
     {
         if (surfaces.TryGetValue(surface.Id, out var data))
         {
@@ -43,7 +43,7 @@ public class PlaneRegistry<T> where T : IDetectedSurface
         return areCentersClose && areNearParallel;
     }
 
-    public void RemoveAndMerge(T surface)
+    public void RemoveAndMerge(IDetectedSurface surface)
     {
         if (surfaces.TryGetValue(surface.Id, out var planeToRemove))
         {

@@ -8,7 +8,7 @@ public class ARSurfaceManager : MonoBehaviour
 {
     public ARPlaneManager planeManager;
 
-    public PlaneRegistry<ARSurface> registry = new PlaneRegistry<ARSurface>();
+    public PlaneRegistry registry;
 
     public GameObject debugPlanePrefab;
 
@@ -53,7 +53,11 @@ public class ARSurfaceManager : MonoBehaviour
             if (debugPlanePrefab != null)
             {
                 GameObject debugPlane = Instantiate(debugPlanePrefab, plane.transform.position, plane.transform.rotation);
+                debugPlane.name = plane.trackableId.ToString();
                 debugPlanes[plane.trackableId] = debugPlane;
+                // Set plane size
+                Vector2 size = plane.size;
+                debugPlane.transform.localScale = new Vector3(size.x, 1f, size.y);
             }
         }
 

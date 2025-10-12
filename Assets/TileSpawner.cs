@@ -6,6 +6,8 @@ public class TileSpawner : MonoBehaviour
 {
     private MLogger logger = MLogger.GetLogger("TileSpawner");
 
+    public GameObject tilePrefab;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -24,8 +26,17 @@ public class TileSpawner : MonoBehaviour
 
     void OnSpawnTile(object data)
     {
-        Vector3 position = (Vector3)data;
+        var (plane, position) = ((Plane, Vector3))data;
         logger.Info($"Spawning tile at {position}");
+
+        Vector3 planeNormal = plane.surfaceInfo.Normal;
+        GameObject newTile = Instantiate(tilePrefab, position, Quaternion.LookRotation(planeNormal));
+        Tile tileComponent = newTile.GetComponent<Tile>();
+        if (tileComponent != null)
+        {
+            tileComponent.plane = plane;
+        }
+
     }
 
     void OnEditTile(object data)

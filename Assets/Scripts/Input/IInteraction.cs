@@ -12,6 +12,7 @@ public struct InteractionEvent {
     public Ray ray;
     public Vector3? hitPoint;
     public Tile targetTile;
+    public Plane targetPlane;
 }
 
 public interface IInteraction {

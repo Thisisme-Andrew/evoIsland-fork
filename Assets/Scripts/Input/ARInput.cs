@@ -8,10 +8,11 @@ public class ARInput : MonoBehaviour, IInteraction
     [SerializeField] private float maxRayDistance = 10f;
     [SerializeField] private LayerMask tileLayerMask;
     [SerializeField] private LayerMask surfaceLayerMask;
+    public float holdThreshold = 0.3f;
+    public PlaneRegistry registry;
 
     private float touchStartTime;
     private bool isHolding;
-    private const float HoldThreshold = 0.3f;
 
     private bool previousMousePressed = false; // Track the previous state of the mouse button
 
@@ -27,7 +28,6 @@ public class ARInput : MonoBehaviour, IInteraction
         e = default;
         e.type = InteractionType.None;
 
-
         // Check for touch input
         if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.isPressed)
         {
@@ -36,53 +36,33 @@ public class ARInput : MonoBehaviour, IInteraction
             Ray ray = arCamera.ScreenPointToRay(touch.position.ReadValue());
             e.ray = ray;
 
-            Tile hitTile = null;
-            Vector3? hitPoint = null;
-
-            if (Physics.Raycast(ray, out RaycastHit hit, maxRayDistance, tileLayerMask))
+            if (HandleRaycast(ray, ref e))
             {
-                hitTile = hit.collider.GetComponent<Tile>();
-                hitPoint = hit.point;
-            }
-            else if (Physics.Raycast(ray, out hit, maxRayDistance, surfaceLayerMask))
-            {
-                hitPoint = hit.point;
-            }
-            else
-            {
-                logger.Info("Raycast did not hit anything");
-                return false;
-            }
-
-            e.targetTile = hitTile;
-            e.hitPoint = hitPoint;
-
-            if (touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Began)
-            {
-                touchStartTime = Time.time;
-            }
-            else if (touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Moved ||
-                     touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Stationary)
-            {
-                if (Time.time - touchStartTime >= HoldThreshold)
+                if (touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Began)
                 {
-                    e.type = InteractionType.Hold;
-                    isHolding = true;
+                    touchStartTime = Time.time; // Set touch start time
+                    e.type = InteractionType.Tap; // Emit Tap on first press
                     return true;
                 }
-            }
-            else if (touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Ended)
-            {
-                if (isHolding)
+                else if (touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Moved ||
+                         touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Stationary)
                 {
-                    e.type = InteractionType.Release;
-                    isHolding = false;
+                    if (Time.time - touchStartTime >= holdThreshold)
+                    {
+                        e.type = InteractionType.Hold;
+                        isHolding = true;
+                        return true;
+                    }
                 }
-                else
+                else if (touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Ended)
                 {
-                    e.type = InteractionType.Tap;
+                    if (isHolding)
+                    {
+                        e.type = InteractionType.Release;
+                        isHolding = false;
+                    }
+                    return true;
                 }
-                return true;
             }
         }
 
@@ -97,41 +77,23 @@ public class ARInput : MonoBehaviour, IInteraction
                 Ray ray = arCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
                 e.ray = ray;
 
-                Tile hitTile = null;
-                Vector3? hitPoint = null;
-
-                if (Physics.Raycast(ray, out RaycastHit hit, maxRayDistance, tileLayerMask))
+                if (HandleRaycast(ray, ref e))
                 {
-                    logger.Info("Raycast hit a tile");
-                    hitTile = hit.collider.GetComponent<Tile>();
-                    hitPoint = hit.point;
-                }
-                else if (Physics.Raycast(ray, out hit, maxRayDistance, surfaceLayerMask))
-                {
-                    logger.Info("Raycast hit a surface");
-                    hitPoint = hit.point;
-                }
-                else
-                {
-                    logger.Info("Raycast did not hit anything");
-                    return false;
-                }
-
-                e.targetTile = hitTile;
-                e.hitPoint = hitPoint;
-
-                if (!previousMousePressed) // Detect mouse press
-                {
-                    logger.Info("Mouse button was pressed this frame");
-                    touchStartTime = Time.time;
-                }
-                else if (Time.time - touchStartTime >= HoldThreshold) // Detect hold
-                {
-                    logger.Info("Hold threshold reached");
-                    e.type = InteractionType.Hold;
-                    isHolding = true;
-                    previousMousePressed = currentMousePressed; // Update previous state
-                    return true;
+                    if (!previousMousePressed) // Detect mouse press
+                    {
+                        touchStartTime = Time.time; // Set touch start time
+                        e.type = InteractionType.Tap; // Emit Tap on first press
+                        previousMousePressed = currentMousePressed; // Update previous state
+                        return true;
+                    }
+                    else if (Time.time - touchStartTime >= holdThreshold) // Detect hold
+                    {
+                        logger.Info("Hold threshold reached");
+                        e.type = InteractionType.Hold;
+                        isHolding = true;
+                        previousMousePressed = currentMousePressed; // Update previous state
+                        return true;
+                    }
                 }
             }
             else if (previousMousePressed) // Detect mouse release
@@ -143,11 +105,6 @@ public class ARInput : MonoBehaviour, IInteraction
                     e.type = InteractionType.Release;
                     isHolding = false;
                 }
-                else
-                {
-                    logger.Info("Interaction type set to Tap");
-                    e.type = InteractionType.Tap;
-                }
                 previousMousePressed = currentMousePressed; // Update previous state
                 return true;
             }
@@ -156,5 +113,37 @@ public class ARInput : MonoBehaviour, IInteraction
         }
 
         return false;
+    }
+
+    private bool HandleRaycast(Ray ray, ref InteractionEvent e)
+    {
+        Tile hitTile = null;
+        Plane hitPlane = null;
+        Vector3? hitPoint = null;
+
+        if (Physics.Raycast(ray, out RaycastHit hit, maxRayDistance, tileLayerMask))
+        {
+            logger.Info("Raycast hit a tile");
+            hitTile = hit.collider.GetComponent<Tile>();
+            hitPoint = hit.point;
+        }
+        else if (Physics.Raycast(ray, out hit, maxRayDistance, surfaceLayerMask))
+        {
+            logger.Info("Raycast hit a surface");
+            string id = hit.collider.gameObject.name;
+            Plane planeObj = registry.Get(id);
+            hitPlane = planeObj;
+            hitPoint = hit.point;
+        }
+        else
+        {
+            logger.Info("Raycast did not hit anything");
+            return false;
+        }
+
+        e.targetTile = hitTile;
+        e.targetPlane = hitPlane;
+        e.hitPoint = hitPoint;
+        return true;
     }
 }
