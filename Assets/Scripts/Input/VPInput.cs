@@ -11,6 +11,9 @@ public class VPInput : MonoBehaviour, IInteraction
     [SerializeField] private LayerMask tileLayerMask;
     [SerializeField] private LayerMask surfaceLayerMask;
 
+    public PlaneRegistry planeRegistry;
+    public TileRegistry tileRegistry;
+
     private bool isGrabbing;
     private float holdTime;
     private const float HoldThreshold = 0.3f;
@@ -51,15 +54,24 @@ public class VPInput : MonoBehaviour, IInteraction
         // 2. Raycast into world
         RaycastHit hit;
         Tile hitTile = null;
-        Vector3? hitPoint = null;
+        Plane hitPlane = null;
+        Vector3 hitPoint;
+        TargetType targetType;
 
         if (Physics.Raycast(gazeRay, out hit, maxRayDistance, tileLayerMask))
         {
-            hitTile = hit.collider.GetComponent<Tile>();
+            string tileId = hit.collider.gameObject.name;
+            targetType = TargetType.Tile;
+
+            hitTile = tileRegistry.Get(tileId);
             hitPoint = hit.point;
         }
         else if (Physics.Raycast(gazeRay, out hit, maxRayDistance, surfaceLayerMask))
         {
+            targetType = TargetType.Plane;
+
+            string id = hit.collider.gameObject.name;
+            hitPlane = planeRegistry.Get(id);
             hitPoint = hit.point;
         }
         else
@@ -70,6 +82,8 @@ public class VPInput : MonoBehaviour, IInteraction
 
         e.targetTile = hitTile;
         e.hitPoint = hitPoint;
+        e.targetPlane = hitPlane;
+        e.targetType = targetType;
 
         // 3. Detect pinch gesture state
         SpatialPointerState primaryTouchData = EnhancedSpatialPointerSupport

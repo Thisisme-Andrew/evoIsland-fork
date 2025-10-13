@@ -9,7 +9,8 @@ public class ARInput : MonoBehaviour, IInteraction
     [SerializeField] private LayerMask tileLayerMask;
     [SerializeField] private LayerMask surfaceLayerMask;
     public float holdThreshold = 0.3f;
-    public PlaneRegistry registry;
+    public PlaneRegistry planeRegistry;
+    public TileRegistry tileRegistry;
 
     private float touchStartTime;
     private bool isHolding;
@@ -120,18 +121,24 @@ public class ARInput : MonoBehaviour, IInteraction
         Tile hitTile = null;
         Plane hitPlane = null;
         Vector3? hitPoint = null;
+        TargetType targetType;
 
         if (Physics.Raycast(ray, out RaycastHit hit, maxRayDistance, tileLayerMask))
         {
             logger.Info("Raycast hit a tile");
-            hitTile = hit.collider.GetComponent<Tile>();
+            targetType = TargetType.Tile;
+
+            string tileId = hit.collider.gameObject.name;
+            hitTile = tileRegistry.Get(tileId);
             hitPoint = hit.point;
         }
         else if (Physics.Raycast(ray, out hit, maxRayDistance, surfaceLayerMask))
         {
             logger.Info("Raycast hit a surface");
+            targetType = TargetType.Plane;
+
             string id = hit.collider.gameObject.name;
-            Plane planeObj = registry.Get(id);
+            Plane planeObj = planeRegistry.Get(id);
             hitPlane = planeObj;
             hitPoint = hit.point;
         }
@@ -144,6 +151,7 @@ public class ARInput : MonoBehaviour, IInteraction
         e.targetTile = hitTile;
         e.targetPlane = hitPlane;
         e.hitPoint = hitPoint;
+        e.targetType = targetType;
         return true;
     }
 }
