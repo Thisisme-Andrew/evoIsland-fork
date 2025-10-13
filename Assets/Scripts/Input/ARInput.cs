@@ -138,8 +138,7 @@ public class ARInput : MonoBehaviour, IInteraction
             targetType = TargetType.Plane;
 
             string id = hit.collider.gameObject.name;
-            Plane planeObj = planeRegistry.Get(id);
-            hitPlane = planeObj;
+            hitPlane = planeRegistry.Get(id);
             hitPoint = hit.point;
         }
         else

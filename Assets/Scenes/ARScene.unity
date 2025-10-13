@@ -197,7 +197,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   planeManager: {fileID: 1580982761}
   registry: {fileID: 44340328}
-  debugPlanePrefab: {fileID: 397268489}
+  planePrefab: {fileID: 397268489}
+  scaleFactor: 0.083333336
 --- !u!4 &334966617
 Transform:
   m_ObjectHideFlags: 0
@@ -251,7 +252,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   holdThreshold: 0.3
-  registry: {fileID: 44340328}
+  planeRegistry: {fileID: 44340328}
+  tileRegistry: {fileID: 823519974}
 --- !u!4 &396622266
 Transform:
   m_ObjectHideFlags: 0
@@ -280,7 +282,7 @@ GameObject:
   - component: {fileID: 397268491}
   - component: {fileID: 397268490}
   m_Layer: 7
-  m_Name: DebugSurface
+  m_Name: Surface
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -328,7 +330,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 793221218293f4b9baa124a1c792bd6b, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -666,8 +668,8 @@ Transform:
   - {fileID: 490554999}
   - {fileID: 396622266}
   - {fileID: 44340329}
-  - {fileID: 334966617}
   - {fileID: 823519975}
+  - {fileID: 334966617}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1363588697
@@ -951,7 +953,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 478ba8b16c6694fd2ae3a0a2fd9c1df5, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

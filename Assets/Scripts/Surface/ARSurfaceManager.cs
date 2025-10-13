@@ -10,9 +10,10 @@ public class ARSurfaceManager : MonoBehaviour
 
     public PlaneRegistry registry;
 
-    public GameObject debugPlanePrefab;
+    public GameObject planePrefab;
+    public float scaleFactor = 1.0f / 12.0f;
 
-    private Dictionary<TrackableId, GameObject> debugPlanes = new Dictionary<TrackableId, GameObject>();
+    private Dictionary<TrackableId, GameObject> planes = new Dictionary<TrackableId, GameObject>();
 
     private MLogger logger = MLogger.GetLogger("ARSurfaceManager");
 
@@ -50,13 +51,13 @@ public class ARSurfaceManager : MonoBehaviour
             logger.Info("Surface added at " + plane.transform.position);
 
             // Spawn debug plane if prefab is set
-            if (debugPlanePrefab != null)
+            if (planePrefab != null)
             {
-                GameObject debugPlane = Instantiate(debugPlanePrefab, plane.transform.position, plane.transform.rotation);
+                GameObject debugPlane = Instantiate(planePrefab, plane.transform.position, plane.transform.rotation);
                 debugPlane.name = plane.trackableId.ToString();
-                debugPlanes[plane.trackableId] = debugPlane;
+                planes[plane.trackableId] = debugPlane;
                 // Set plane size
-                Vector2 size = plane.size;
+                Vector2 size = plane.size * scaleFactor;
                 debugPlane.transform.localScale = new Vector3(size.x, 1f, size.y);
             }
         }
@@ -74,9 +75,11 @@ public class ARSurfaceManager : MonoBehaviour
             }
 
             // Update debug plane position
-            if (debugPlanes.ContainsKey(plane.trackableId))
+            if (planes.ContainsKey(plane.trackableId))
             {
-                GameObject debugPlane = debugPlanes[plane.trackableId];
+                Vector2 planeSize = plane.size * scaleFactor;
+                GameObject debugPlane = planes[plane.trackableId];
+                debugPlane.transform.localScale = new Vector3(planeSize.x, 1f, planeSize.y);
                 debugPlane.transform.position = plane.transform.position;
                 debugPlane.transform.rotation = plane.transform.rotation;
             }
@@ -95,11 +98,11 @@ public class ARSurfaceManager : MonoBehaviour
             }
 
             // Remove debug plane
-            if (debugPlanes.ContainsKey(plane.trackableId))
+            if (planes.ContainsKey(plane.trackableId))
             {
-                GameObject debugPlane = debugPlanes[plane.trackableId];
+                GameObject debugPlane = planes[plane.trackableId];
                 Destroy(debugPlane);
-                debugPlanes.Remove(plane.trackableId);
+                planes.Remove(plane.trackableId);
             }
         }
     }
