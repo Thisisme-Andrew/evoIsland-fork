@@ -7,22 +7,23 @@ public class VPSurfaceManager : MonoBehaviour
 {
     private XRMeshSubsystem meshSubsystem;
 
-    public PlaneRegistry<VPSurface> registry = new PlaneRegistry<VPSurface>();
+    public PlaneRegistry registry = new PlaneRegistry();
 
     public GameObject debugPlanePrefab;
     private Dictionary<MeshId, GameObject> debugPlanes = new Dictionary<MeshId, GameObject>();
+
+    private MLogger logger = MLogger.GetLogger("VPSurfaceManager");
 
     void Start()
     {
         meshSubsystem = GetMeshSubsystem();
         if (meshSubsystem == null)
         {
-            Debug.LogError("[VPSurfaceManager] XRMeshSubsystem not found. Ensure it is properly configured.");
+            logger.Info("XRMeshSubsystem not found. Ensure it is properly configured.");
             return;
         }
 
-        registry = new PlaneRegistry<VPSurface>();
-        Debug.Log("[VPSurfaceManager] initialized on VisionOS.");
+        logger.Info("initialized on VisionOS.");
     }
 
     XRMeshSubsystem GetMeshSubsystem()
@@ -72,12 +73,19 @@ public class VPSurfaceManager : MonoBehaviour
                 anchor.transform.position = result.Position;
                 anchor.transform.rotation = result.Rotation;
 
-                Debug.Log("[VPSurfaceManager] Surface added at " + result.Position);
+                logger.Info("Surface added at " + result.Position);
 
                 // Spawn debug plane if prefab is set
                 if (debugPlanePrefab != null)
                 {
+                    // TODO: Adapt to mesh shape rather than flat plane
                     GameObject debugPlane = Instantiate(debugPlanePrefab, result.Position, result.Rotation);
+                    debugPlane.transform.parent = transform;
+
+                    // Adjust the scale of the debug plane to match the mesh bounds
+                    Vector3 meshSize = result.Mesh.bounds.size;
+                    debugPlane.transform.localScale = new Vector3(meshSize.x, 1, meshSize.z);
+
                     debugPlanes[meshInfo.MeshId] = debugPlane;
                 }
             }
@@ -96,14 +104,18 @@ public class VPSurfaceManager : MonoBehaviour
                 if (result.Status == MeshGenerationStatus.Success)
                 {
                     existingSurface.Update(result.Mesh, result.Position, result.Rotation);
-                    Debug.Log("[VPSurfaceManager] Surface updated at " + result.Position);
+                    logger.Info("Surface updated at " + result.Position);
 
-                    // Update debug plane position
+                    // Update debug plane position and scale
                     if (debugPlanes.ContainsKey(meshInfo.MeshId))
                     {
                         GameObject debugPlane = debugPlanes[meshInfo.MeshId];
                         debugPlane.transform.position = result.Position;
                         debugPlane.transform.rotation = result.Rotation;
+
+                        // Adjust the scale of the debug plane to match the updated mesh bounds
+                        Vector3 meshSize = result.Mesh.bounds.size;
+                        debugPlane.transform.localScale = new Vector3(meshSize.x, 1, meshSize.z);
                     }
                 }
             });
@@ -117,7 +129,7 @@ public class VPSurfaceManager : MonoBehaviour
         if (existingSurface != null)
         {
             registry.RemoveAndMerge(existingSurface);
-            Debug.Log("[VPSurfaceManager] Surface removed and merged with MeshId: " + meshInfo.MeshId);
+            logger.Info("Surface removed and merged with MeshId: " + meshInfo.MeshId);
 
             // Remove debug plane
             if (debugPlanes.ContainsKey(meshInfo.MeshId))

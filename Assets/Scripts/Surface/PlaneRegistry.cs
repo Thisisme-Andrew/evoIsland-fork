@@ -1,24 +1,29 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlaneRegistry<T> where T : IDetectedSurface
+public class PlaneRegistry : MonoBehaviour
 {
     private Dictionary<string, Plane> surfaces = new();
+    private MLogger logger = MLogger.GetLogger("PlaneRegistry");
 
-    public void Add(T surface)
+    public PlaneRegistry()
+    {
+    }
+
+    public void Add(IDetectedSurface surface)
     {
         if (!surfaces.ContainsKey(surface.Id))
         {
-            Debug.Log($"[PlaneRegistry] Adding new surface {surface.Id} at {surface.Center}");
+            logger.Info($"Adding new surface {surface.Id} at {surface.Center}");
             surfaces[surface.Id] = new Plane(surface);
         }
     }
 
-    public void Remove(T surface)
+    public void Remove(IDetectedSurface surface)
     {
         if (surfaces.TryGetValue(surface.Id, out var data))
         {
-            Debug.Log($"[PlaneRegistry] Removing surface {surface.Id}");
+            logger.Info($"Removing surface {surface.Id}");
             // optionally transfer data to nearby surface if needed
             surfaces.Remove(surface.Id);
         }
@@ -38,7 +43,7 @@ public class PlaneRegistry<T> where T : IDetectedSurface
         return areCentersClose && areNearParallel;
     }
 
-    public void RemoveAndMerge(T surface)
+    public void RemoveAndMerge(IDetectedSurface surface)
     {
         if (surfaces.TryGetValue(surface.Id, out var planeToRemove))
         {
@@ -52,7 +57,7 @@ public class PlaneRegistry<T> where T : IDetectedSurface
             }
 
             surfaces.Remove(surface.Id);
-            Debug.Log($"[PlaneRegistry] Removed and merged surface {surface.Id}");
+            logger.Info($"Removed and merged surface {surface.Id}");
         }
     }
 

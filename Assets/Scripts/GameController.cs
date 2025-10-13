@@ -7,6 +7,8 @@ public class GameController : MonoBehaviour
     public GameObject interactionHandler;
     private IInteraction _interactionHandler;
 
+    private MLogger logger = MLogger.GetLogger("GameController");
+
     void Start()
     {
         if (interactionHandler == null || interactionHandler.GetComponent<IInteraction>() == null)
@@ -30,24 +32,34 @@ public class GameController : MonoBehaviour
         switch (e.type)
         {
             case InteractionType.Tap:
-                if (e.targetTile == null && e.hitPoint.HasValue)
+                logger.Info("Tap interaction detected");
+                if (e.targetType == TargetType.Tile)
                 {
-                    Signal.Emit("SpawnTile", e.hitPoint.Value);
+                    logger.Info("Tile tapped");
                 }
-                else if (e.targetTile != null)
+                else if (e.targetType == TargetType.Plane)
                 {
-                    Signal.Emit("EditTile", e.targetTile);
+                    logger.Info("Plane tapped");
+                    if (e.targetTile == null && e.hitPoint.HasValue)
+                    {
+                        Signal.Emit("SpawnTile", (e.targetPlane, e.hitPoint.Value));
+                    }
+                    else if (e.targetTile != null)
+                    {
+                        Signal.Emit("EditTile", e.targetTile);
+                    }
                 }
                 break;
 
             case InteractionType.Hold:
-                if (e.targetTile != null)
+                if (e.targetTile != null && e.hitPoint.HasValue)
                 {
-                    Signal.Emit("DragTile", e.targetTile);
+                    Signal.Emit("DragTile", (e.targetTile, e.hitPoint.Value));
                 }
                 break;
 
             case InteractionType.Release:
+                logger.Info("Release interaction detected");
                 Signal.Emit("ReleaseTile", e.targetTile);
                 break;
         }

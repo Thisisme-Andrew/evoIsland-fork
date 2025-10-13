@@ -22,4 +22,10 @@ public class Plane
         creationTime = Mathf.Min(creationTime, other.creationTime);
         // Optionally merge other metadata
     }
+
+    public void Update(IDetectedSurface surface)
+    {
+        surfaceInfo = surface;
+        // Optionally update other metadata if needed
+    }
 }
