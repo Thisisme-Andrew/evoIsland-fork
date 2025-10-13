@@ -80,6 +80,7 @@ public class VPSurfaceManager : MonoBehaviour
                 {
                     // TODO: Adapt to mesh shape rather than flat plane
                     GameObject debugPlane = Instantiate(debugPlanePrefab, result.Position, result.Rotation);
+                    debugPlane.transform.parent = transform;
 
                     // Adjust the scale of the debug plane to match the mesh bounds
                     Vector3 meshSize = result.Mesh.bounds.size;

@@ -33,14 +33,21 @@ public class GameController : MonoBehaviour
         {
             case InteractionType.Tap:
                 logger.Info("Tap interaction detected");
-                logger.Info($"Hit Tile: {e.targetTile != null}, Hit Plane: {e.targetPlane != null}, Hit Point: {e.hitPoint.HasValue}");
-                if (e.targetTile == null && e.hitPoint.HasValue)
+                if (e.targetType == TargetType.Tile)
                 {
-                    Signal.Emit("SpawnTile", (e.targetPlane, e.hitPoint.Value));
+                    logger.Info("Tile tapped");
                 }
-                else if (e.targetTile != null)
+                else if (e.targetType == TargetType.Plane)
                 {
-                    Signal.Emit("EditTile", e.targetTile);
+                    logger.Info("Plane tapped");
+                    if (e.targetTile == null && e.hitPoint.HasValue)
+                    {
+                        Signal.Emit("SpawnTile", (e.targetPlane, e.hitPoint.Value));
+                    }
+                    else if (e.targetTile != null)
+                    {
+                        Signal.Emit("EditTile", e.targetTile);
+                    }
                 }
                 break;
 

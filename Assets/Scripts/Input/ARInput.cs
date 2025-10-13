@@ -120,7 +120,7 @@ public class ARInput : MonoBehaviour, IInteraction
     {
         Tile hitTile = null;
         Plane hitPlane = null;
-        Vector3? hitPoint = null;
+        Vector3? hitPoint;
         TargetType targetType;
 
         if (Physics.Raycast(ray, out RaycastHit hit, maxRayDistance, tileLayerMask))

@@ -12,6 +12,7 @@ public class TileSpawner : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        logger.Enable(false);
         // Subscribe to input signals
         Signal.Subscribe("SpawnTile", OnSpawnTile);
         Signal.Subscribe("EditTile", OnEditTile);
@@ -34,6 +35,7 @@ public class TileSpawner : MonoBehaviour
 
         Vector3 planeNormal = plane.surfaceInfo.Normal;
         GameObject newTile = Instantiate(tilePrefab, position, Quaternion.FromToRotation(Vector3.up, planeNormal));
+        newTile.transform.parent = transform;
         newTile.name = id;
         registry.Add(id, plane);
     }

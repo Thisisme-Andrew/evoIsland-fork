@@ -55,6 +55,7 @@ public class ARSurfaceManager : MonoBehaviour
             {
                 GameObject debugPlane = Instantiate(planePrefab, plane.transform.position, plane.transform.rotation);
                 debugPlane.name = plane.trackableId.ToString();
+                debugPlane.transform.parent = transform;
                 planes[plane.trackableId] = debugPlane;
                 // Set plane size
                 Vector2 size = plane.size * scaleFactor;

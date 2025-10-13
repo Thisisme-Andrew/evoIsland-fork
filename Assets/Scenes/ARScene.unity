@@ -177,7 +177,7 @@ GameObject:
   - component: {fileID: 334966617}
   - component: {fileID: 334966616}
   m_Layer: 0
-  m_Name: SurfaceManager
+  m_Name: Planes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -212,7 +212,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1198918115}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &396622264
 GameObject:
@@ -669,7 +669,6 @@ Transform:
   - {fileID: 396622266}
   - {fileID: 44340329}
   - {fileID: 823519975}
-  - {fileID: 334966617}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1363588697
@@ -1150,4 +1149,5 @@ SceneRoots:
   - {fileID: 397268493}
   - {fileID: 578570910}
   - {fileID: 1198918115}
+  - {fileID: 334966617}
   - {fileID: 1166293726}
