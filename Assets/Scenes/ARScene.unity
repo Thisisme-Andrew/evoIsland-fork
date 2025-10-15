@@ -244,13 +244,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   arCamera: {fileID: 1363588703}
-  maxRayDistance: 10
-  tileLayerMask:
-    serializedVersion: 2
-    m_Bits: 256
-  surfaceLayerMask:
-    serializedVersion: 2
-    m_Bits: 128
   holdThreshold: 0.3
   planeRegistry: {fileID: 44340328}
   tileRegistry: {fileID: 823519974}
@@ -405,6 +398,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   interactionHandler: {fileID: 396622264}
+  maxRayDistance: 10
+  tileLayerMask:
+    serializedVersion: 2
+    m_Bits: 256
+  surfaceLayerMask:
+    serializedVersion: 2
+    m_Bits: 128
+  planeRegistry: {fileID: 44340328}
+  tileRegistry: {fileID: 823519974}
 --- !u!4 &490554999
 Transform:
   m_ObjectHideFlags: 0

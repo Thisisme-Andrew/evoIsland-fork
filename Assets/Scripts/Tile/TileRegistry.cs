@@ -10,12 +10,12 @@ public class TileRegistry : MonoBehaviour
     {
     }
 
-    public void Add(string id, Plane plane)
+    public void Add(string id, Plane plane, GameObject tileObject)
     {
         if (!tiles.ContainsKey(id))
         {
             logger.Info($"Adding new tile {id} at {plane.surfaceInfo.Center}");
-            tiles[id] = new Tile(plane);
+            tiles[id] = new Tile(plane, tileObject);
         }
     }
 
