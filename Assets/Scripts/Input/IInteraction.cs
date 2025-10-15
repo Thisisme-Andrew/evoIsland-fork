@@ -16,12 +16,8 @@ public enum TargetType {
 public struct InteractionEvent {
     public InteractionType type;
     public Ray ray;
-    public TargetType targetType;
-    public Vector3? hitPoint;
-    public Tile targetTile;
-    public Plane targetPlane;
 }
 
 public interface IInteraction {
-bool TryGetInteraction(out InteractionEvent e);
+    bool TryGetInteraction(out InteractionEvent interactionEvent);
 }

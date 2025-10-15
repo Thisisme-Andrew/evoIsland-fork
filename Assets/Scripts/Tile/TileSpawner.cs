@@ -12,7 +12,7 @@ public class TileSpawner : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        logger.Enable(false);
+        logger.Enable(true);
         // Subscribe to input signals
         Signal.Subscribe("SpawnTile", OnSpawnTile);
         Signal.Subscribe("EditTile", OnEditTile);

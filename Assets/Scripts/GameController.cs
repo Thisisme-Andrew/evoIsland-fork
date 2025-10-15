@@ -9,8 +9,28 @@ public class GameController : MonoBehaviour
 
     private MLogger logger = MLogger.GetLogger("GameController");
 
+    public static GameController Instance { get; private set; }
+
+    [SerializeField] private float maxRayDistance = 10f;
+    [SerializeField] private LayerMask tileLayerMask;
+    [SerializeField] private LayerMask surfaceLayerMask;
+    public PlaneRegistry planeRegistry;
+    public TileRegistry tileRegistry;
+
+    void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
+
     void Start()
     {
+        logger.Enable(true);
         if (interactionHandler == null || interactionHandler.GetComponent<IInteraction>() == null)
         {
             Debug.LogError("Interaction handler not set or does not implement IInteraction.");
@@ -22,46 +42,87 @@ public class GameController : MonoBehaviour
 
     void Update()
     {
-        if (_interactionHandler.TryGetInteraction(out InteractionEvent e)) {
-            HandleInteraction(e);
+        if (_interactionHandler.TryGetInteraction(out InteractionEvent interactionEvent))
+        {
+            HandleInteraction(interactionEvent);
         }
     }
 
-    void HandleInteraction(InteractionEvent e)
+    void HandleInteraction(InteractionEvent interactionEvent)
     {
-        switch (e.type)
+        TargetType targetType = TargetType.None;
+        Tile hitTile = null;
+        Plane hitPlane = null;
+        Vector3? hitPoint = null;
+
+        if (HandleRaycast(interactionEvent.ray, out targetType, out hitTile, out hitPlane, out hitPoint))
         {
-            case InteractionType.Tap:
-                logger.Info("Tap interaction detected");
-                if (e.targetType == TargetType.Tile)
-                {
-                    logger.Info("Tile tapped");
-                }
-                else if (e.targetType == TargetType.Plane)
-                {
-                    logger.Info("Plane tapped");
-                    if (e.targetTile == null && e.hitPoint.HasValue)
+            switch (interactionEvent.type)
+            {
+                case InteractionType.Tap:
+                    logger.Info("Tap interaction detected");
+                    if (targetType == TargetType.Tile)
                     {
-                        Signal.Emit("SpawnTile", (e.targetPlane, e.hitPoint.Value));
+                        logger.Info("Tile tapped");
                     }
-                    else if (e.targetTile != null)
+                    else if (targetType == TargetType.Plane)
                     {
-                        Signal.Emit("EditTile", e.targetTile);
+                        logger.Info("Plane tapped");
+                        if (hitTile == null && hitPoint.HasValue)
+                        {
+                            Signal.Emit("SpawnTile", (hitPlane, hitPoint.Value));
+                        }
+                        else if (hitTile != null)
+                        {
+                            Signal.Emit("EditTile", hitTile);
+                        }
                     }
-                }
-                break;
+                    break;
 
-            case InteractionType.Hold:
-                if (e.targetTile != null && e.hitPoint.HasValue)
-                {
-                    Signal.Emit("DragTile", (e.targetTile, e.hitPoint.Value));
-                }
-                break;
+                case InteractionType.Hold:
+                    if (hitTile != null && hitPoint.HasValue)
+                    {
+                        Signal.Emit("DragTile", (hitTile, hitPoint.Value));
+                    }
+                    break;
 
-            case InteractionType.Release:
-                logger.Info("Release interaction detected");
-                Signal.Emit("ReleaseTile", e.targetTile);
-                break;
+                case InteractionType.Release:
+                    logger.Info("Release interaction detected");
+                    Signal.Emit("ReleaseTile", hitTile);
+                    break;
+            }
         }
+    }
+
+    private bool HandleRaycast(Ray ray, out TargetType targetType, out Tile hitTile, out Plane hitPlane, out Vector3? hitPoint)
+    {
+        hitTile = null;
+        hitPlane = null;
+        hitPoint = null;
+        targetType = TargetType.None;
+
+        if (Physics.Raycast(ray, out RaycastHit hit, maxRayDistance, tileLayerMask))
+        {
+            logger.Info("Raycast hit a tile");
+            targetType = TargetType.Tile;
+
+            string tileId = hit.collider.gameObject.name;
+            hitTile = tileRegistry.Get(tileId);
+            hitPoint = hit.point;
+            return true;
+        }
+        else if (Physics.Raycast(ray, out hit, maxRayDistance, surfaceLayerMask))
+        {
+            logger.Info("Raycast hit a surface");
+            targetType = TargetType.Plane;
+
+            string id = hit.collider.gameObject.name;
+            hitPlane = planeRegistry.Get(id);
+            hitPoint = hit.point;
+            return true;
+        }
+
+        logger.Info("Raycast did not hit anything");
+        return false;
     }
 }

@@ -7,13 +7,6 @@ using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 public class VPInput : MonoBehaviour, IInteraction
 {
-    [SerializeField] private float maxRayDistance = 5f;
-    [SerializeField] private LayerMask tileLayerMask;
-    [SerializeField] private LayerMask surfaceLayerMask;
-
-    public PlaneRegistry planeRegistry;
-    public TileRegistry tileRegistry;
-
     private bool isGrabbing;
     private float holdTime;
     private const float HoldThreshold = 0.3f;
@@ -26,21 +19,18 @@ public class VPInput : MonoBehaviour, IInteraction
         logger.Info("EnhancedTouchSupport enabled");
     }
 
-    public bool TryGetInteraction(out InteractionEvent e)
+    public bool TryGetInteraction(out InteractionEvent interactionEvent)
     {
+        interactionEvent = default;
+
         logger.Info("Attempting to get interaction");
         var activeTouches = Touch.activeTouches;
         if (activeTouches.Count <= 0)
         {
             isGrabbing = false;
             holdTime = 0;
-            e = default;
-            e.type = InteractionType.None;
             return false;
         }
-
-        e = default;
-        e.type = InteractionType.None;
 
         // 1. Eye ray from headset
         var centerEye = InputDevices.GetDeviceAtXRNode(XRNode.CenterEye);
@@ -48,44 +38,9 @@ public class VPInput : MonoBehaviour, IInteraction
             !centerEye.TryGetFeatureValue(CommonUsages.deviceRotation, out Quaternion headRot))
             return false;
 
-        Ray gazeRay = new Ray(headPos, headRot * Vector3.forward);
-        e.ray = gazeRay;
+        interactionEvent.ray = new Ray(headPos, headRot * Vector3.forward);
 
-        // 2. Raycast into world
-        RaycastHit hit;
-        Tile hitTile = null;
-        Plane hitPlane = null;
-        Vector3 hitPoint;
-        TargetType targetType;
-
-        if (Physics.Raycast(gazeRay, out hit, maxRayDistance, tileLayerMask))
-        {
-            string tileId = hit.collider.gameObject.name;
-            targetType = TargetType.Tile;
-
-            hitTile = tileRegistry.Get(tileId);
-            hitPoint = hit.point;
-        }
-        else if (Physics.Raycast(gazeRay, out hit, maxRayDistance, surfaceLayerMask))
-        {
-            targetType = TargetType.Plane;
-
-            string id = hit.collider.gameObject.name;
-            hitPlane = planeRegistry.Get(id);
-            hitPoint = hit.point;
-        }
-        else
-        {
-            logger.Info("Raycast did not hit anything");
-            return false;
-        }
-
-        e.targetTile = hitTile;
-        e.hitPoint = hitPoint;
-        e.targetPlane = hitPlane;
-        e.targetType = targetType;
-
-        // 3. Detect pinch gesture state
+        // 2. Detect pinch gesture state
         SpatialPointerState primaryTouchData = EnhancedSpatialPointerSupport
             .GetPointerState(activeTouches[0]);
         SpatialPointerKind interactionKind = primaryTouchData.Kind;
@@ -96,7 +51,7 @@ public class VPInput : MonoBehaviour, IInteraction
             if (!isGrabbing)
             {
                 holdTime = 0;
-                e.type = InteractionType.Tap;
+                interactionEvent.type = InteractionType.Tap;
                 isGrabbing = true;
                 return true;
             }
@@ -107,7 +62,7 @@ public class VPInput : MonoBehaviour, IInteraction
             holdTime += Time.deltaTime;
             if (holdTime >= HoldThreshold)
             {
-                e.type = InteractionType.Hold;
+                interactionEvent.type = InteractionType.Hold;
                 logger.Info("Hold threshold reached");
                 return true;
             }
@@ -115,7 +70,7 @@ public class VPInput : MonoBehaviour, IInteraction
 
         if (interactionKind != SpatialPointerKind.DirectPinch && isGrabbing)
         {
-            e.type = InteractionType.Release;
+            interactionEvent.type = InteractionType.Release;
             isGrabbing = false;
             logger.Info("Interaction type set to Release");
             return true;
