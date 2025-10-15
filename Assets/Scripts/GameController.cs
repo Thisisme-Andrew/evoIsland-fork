@@ -17,6 +17,10 @@ public class GameController : MonoBehaviour
     public PlaneRegistry planeRegistry;
     public TileRegistry tileRegistry;
 
+    private Tile currentlyHeldTile = null;
+    private Vector3? currentlyHeldTileHitPoint = null;
+    private Plane currentlyHeldPlane = null;
+
     void Awake()
     {
         if (Instance != null && Instance != this)
@@ -83,6 +87,13 @@ public class GameController : MonoBehaviour
                 case InteractionType.Hold:
                     if (hitTile != null && tileHitPoint.HasValue)
                     {
+                        currentlyHeldTile = hitTile;
+                        currentlyHeldTileHitPoint = tileHitPoint;
+                        currentlyHeldPlane = hitPlane;
+                    }
+
+                    if (currentlyHeldTile != null && currentlyHeldTileHitPoint.HasValue)
+                    {
                         Vector3 targetPosition;
 
                         if (surfaceHitPoint.HasValue)
@@ -94,13 +105,16 @@ public class GameController : MonoBehaviour
                             targetPosition = interactionEvent.ray.origin + interactionEvent.ray.direction * 2.0f;
                         }
 
-                        Signal.Emit("DragTile", (hitTile, tileHitPoint.Value, hitPlane, targetPosition));
+                        Signal.Emit("DragTile", (currentlyHeldTile, currentlyHeldTileHitPoint.Value, currentlyHeldPlane, targetPosition));
                     }
                     break;
 
                 case InteractionType.Release:
                     logger.Info("Release interaction detected");
-                    Signal.Emit("ReleaseTile", hitTile);
+                    Signal.Emit("ReleaseTile", currentlyHeldTile);
+                    currentlyHeldTile = null;
+                    currentlyHeldTileHitPoint = null;
+                    currentlyHeldPlane = null;
                     break;
             }
         }
