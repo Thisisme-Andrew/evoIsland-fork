@@ -53,9 +53,10 @@ public class GameController : MonoBehaviour
         TargetType targetType = TargetType.None;
         Tile hitTile = null;
         Plane hitPlane = null;
-        Vector3? hitPoint = null;
+        Vector3? tileHitPoint = null;
+        Vector3? surfaceHitPoint = null;
 
-        if (HandleRaycast(interactionEvent.ray, out targetType, out hitTile, out hitPlane, out hitPoint))
+        if (HandleRaycast(interactionEvent.ray, out targetType, out hitTile, out hitPlane, out tileHitPoint, out surfaceHitPoint))
         {
             switch (interactionEvent.type)
             {
@@ -68,9 +69,9 @@ public class GameController : MonoBehaviour
                     else if (targetType == TargetType.Plane)
                     {
                         logger.Info("Plane tapped");
-                        if (hitTile == null && hitPoint.HasValue)
+                        if (hitTile == null && surfaceHitPoint.HasValue)
                         {
-                            Signal.Emit("SpawnTile", (hitPlane, hitPoint.Value));
+                            Signal.Emit("SpawnTile", (hitPlane, surfaceHitPoint.Value));
                         }
                         else if (hitTile != null)
                         {
@@ -80,9 +81,20 @@ public class GameController : MonoBehaviour
                     break;
 
                 case InteractionType.Hold:
-                    if (hitTile != null && hitPoint.HasValue)
+                    if (hitTile != null && tileHitPoint.HasValue)
                     {
-                        Signal.Emit("DragTile", (hitTile, hitPoint.Value));
+                        Vector3 targetPosition;
+
+                        if (surfaceHitPoint.HasValue)
+                        {
+                            targetPosition = surfaceHitPoint.Value;
+                        }
+                        else
+                        {
+                            targetPosition = interactionEvent.ray.origin + interactionEvent.ray.direction * 2.0f;
+                        }
+
+                        Signal.Emit("DragTile", (hitTile, tileHitPoint.Value, hitPlane, targetPosition));
                     }
                     break;
 
@@ -94,31 +106,41 @@ public class GameController : MonoBehaviour
         }
     }
 
-    private bool HandleRaycast(Ray ray, out TargetType targetType, out Tile hitTile, out Plane hitPlane, out Vector3? hitPoint)
+    private bool HandleRaycast(Ray ray, out TargetType targetType, out Tile hitTile, out Plane hitPlane, out Vector3? tileHitPoint, out Vector3? surfaceHitPoint)
     {
         hitTile = null;
         hitPlane = null;
-        hitPoint = null;
+        tileHitPoint = null;
+        surfaceHitPoint = null;
         targetType = TargetType.None;
 
-        if (Physics.Raycast(ray, out RaycastHit hit, maxRayDistance, tileLayerMask))
+        if (Physics.Raycast(ray, out RaycastHit tileHit, maxRayDistance, tileLayerMask))
         {
             logger.Info("Raycast hit a tile");
             targetType = TargetType.Tile;
 
-            string tileId = hit.collider.gameObject.name;
+            string tileId = tileHit.collider.gameObject.name;
             hitTile = tileRegistry.Get(tileId);
-            hitPoint = hit.point;
+            tileHitPoint = tileHit.point;
+
+            // Perform an additional raycast for the surface
+            if (Physics.Raycast(ray, out RaycastHit surfaceHit, maxRayDistance, surfaceLayerMask))
+            {
+                logger.Info("Raycast also hit a surface");
+                hitPlane = planeRegistry.Get(surfaceHit.collider.gameObject.name);
+                surfaceHitPoint = surfaceHit.point;
+            }
+
             return true;
         }
-        else if (Physics.Raycast(ray, out hit, maxRayDistance, surfaceLayerMask))
+        else if (Physics.Raycast(ray, out RaycastHit surfaceOnlyHit, maxRayDistance, surfaceLayerMask))
         {
             logger.Info("Raycast hit a surface");
             targetType = TargetType.Plane;
 
-            string id = hit.collider.gameObject.name;
+            string id = surfaceOnlyHit.collider.gameObject.name;
             hitPlane = planeRegistry.Get(id);
-            hitPoint = hit.point;
+            surfaceHitPoint = surfaceOnlyHit.point;
             return true;
         }
 

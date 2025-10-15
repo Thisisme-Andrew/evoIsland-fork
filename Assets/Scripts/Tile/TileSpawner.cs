@@ -28,16 +28,16 @@ public class TileSpawner : MonoBehaviour
 
     void OnSpawnTile(object data)
     {
-        var (plane, position) = ((Plane, Vector3))data;
-        logger.Info($"Spawning tile at {position}");
+        var (plane, planePosition) = ((Plane, Vector3))data;
+        logger.Info($"Spawning tile at {planePosition}");
 
         string id = System.Guid.NewGuid().ToString();
 
         Vector3 planeNormal = plane.surfaceInfo.Normal;
-        GameObject newTile = Instantiate(tilePrefab, position, Quaternion.FromToRotation(Vector3.up, planeNormal));
+        GameObject newTile = Instantiate(tilePrefab, planePosition, Quaternion.FromToRotation(Vector3.up, planeNormal));
         newTile.transform.parent = transform;
         newTile.name = id;
-        registry.Add(id, plane);
+        registry.Add(id, plane, newTile);
     }
 
     void OnEditTile(object data)
@@ -48,9 +48,17 @@ public class TileSpawner : MonoBehaviour
 
     void OnDragTile(object data)
     {
-        var (tile, position) = ((Tile, Vector3))data;
+        var (tile, tilePosition, plane, planePosition) = ((Tile, Vector3, Plane, Vector3))data;
 
-        logger.Info($"Dragging tile to {position}");
+        logger.Info($"Dragging tile to {planePosition}");
+        tile.GameObject.transform.position = planePosition;
+
+        // Optional: Align tile rotation with plane normal
+        if (plane != null)
+        {
+            Vector3 planeNormal = plane.surfaceInfo.Normal;
+            tile.GameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, planeNormal);
+        }
     }
 
     void OnReleaseTile(object data)
