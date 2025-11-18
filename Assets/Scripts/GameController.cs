@@ -85,6 +85,7 @@ public class GameController : MonoBehaviour
                     break;
 
                 case InteractionType.Hold:
+                    logger.Info("Hold interaction on tile detected: " + (hitTile != null) + " " + tileHitPoint.HasValue);
                     if (hitTile != null && tileHitPoint.HasValue)
                     {
                         currentlyHeldTile = hitTile;
@@ -130,7 +131,7 @@ public class GameController : MonoBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit tileHit, maxRayDistance, tileLayerMask))
         {
-            logger.Info("Raycast hit a tile");
+            logger.Verbose("Raycast hit a tile");
             targetType = TargetType.Tile;
 
             string tileId = tileHit.collider.gameObject.name;
@@ -140,7 +141,7 @@ public class GameController : MonoBehaviour
             // Perform an additional raycast for the surface
             if (Physics.Raycast(ray, out RaycastHit surfaceHit, maxRayDistance, surfaceLayerMask))
             {
-                logger.Info("Raycast also hit a surface");
+                logger.Verbose("Raycast also hit a surface");
                 hitPlane = planeRegistry.Get(surfaceHit.collider.gameObject.name);
                 surfaceHitPoint = surfaceHit.point;
             }
@@ -149,7 +150,7 @@ public class GameController : MonoBehaviour
         }
         else if (Physics.Raycast(ray, out RaycastHit surfaceOnlyHit, maxRayDistance, surfaceLayerMask))
         {
-            logger.Info("Raycast hit a surface");
+            logger.Verbose("Raycast hit a surface");
             targetType = TargetType.Plane;
 
             string id = surfaceOnlyHit.collider.gameObject.name;
@@ -158,7 +159,7 @@ public class GameController : MonoBehaviour
             return true;
         }
 
-        logger.Info("Raycast did not hit anything");
+        logger.Verbose("Raycast did not hit anything");
         return false;
     }
 }

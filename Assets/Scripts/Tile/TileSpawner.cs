@@ -64,14 +64,25 @@ public class TileSpawner : MonoBehaviour
 
         logger.Info($"Dragging tile to {planePosition}");
 
-        // While dragging, follow the input hit position directly
-        tile.GameObject.transform.position = planePosition;
-
-        // Optional: Align tile rotation with plane normal
+        // While dragging, snap to the plane-local hex grid when a plane is available.
         if (plane != null)
         {
             Vector3 planeNormal = plane.surfaceInfo.Normal;
+            Vector3 planeOrigin = plane.surfaceInfo.Center;
+
+            Vector2 hexCoord = HexGrid.WorldToHex(planePosition, hexRadius, planeNormal, planeOrigin);
+            Vector3 snapped = HexGrid.HexToWorld(hexCoord, hexRadius, planeNormal, planeOrigin);
+            // Preserve perpendicular offset from the plane origin so the hit height is kept
+            float offset = Vector3.Dot(planePosition - planeOrigin, planeNormal);
+            snapped += planeNormal * offset;
+
+            tile.GameObject.transform.position = snapped;
             tile.GameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, planeNormal);
+        }
+        else
+        {
+            // No plane info — just follow the raw hit position
+            tile.GameObject.transform.position = planePosition;
         }
     }
 
