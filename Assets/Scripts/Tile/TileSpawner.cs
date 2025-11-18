@@ -8,6 +8,7 @@ public class TileSpawner : MonoBehaviour
 
     public GameObject tilePrefab;
     public TileRegistry registry;
+    public float hexRadius = 1f; // make radius configurable on the inspector
 
     // Start is called before the first frame update
     void Start()
@@ -30,12 +31,23 @@ public class TileSpawner : MonoBehaviour
     {
         var (plane, planePosition) = ((Plane, Vector3))data;
         logger.Info($"Spawning tile at {planePosition}");
+        // Snap position to hex grid oriented to the detected plane
+        Vector3 planeNormal = plane.surfaceInfo.Normal;
+        Vector3 planeOrigin = plane.surfaceInfo.Center;
+
+        Vector2 hexCoord = HexGrid.WorldToHex(planePosition, hexRadius, planeNormal, planeOrigin);
+        Vector3 snappedPosition = HexGrid.HexToWorld(hexCoord, hexRadius, planeNormal, planeOrigin);
+        logger.Info($"hexRadius={hexRadius} hexCoord={hexCoord} snappedLocal={snappedPosition}");
+        // preserve the perpendicular offset from the plane origin so the hit height is kept
+        float offset = Vector3.Dot(planePosition - planeOrigin, planeNormal);
+        snappedPosition += planeNormal * offset;
+        logger.Info("Snapped position: " + snappedPosition);
 
         string id = System.Guid.NewGuid().ToString();
 
-        Vector3 planeNormal = plane.surfaceInfo.Normal;
-        GameObject newTile = Instantiate(tilePrefab, planePosition, Quaternion.FromToRotation(Vector3.up, planeNormal));
+        GameObject newTile = Instantiate(tilePrefab, snappedPosition, Quaternion.FromToRotation(Vector3.up, planeNormal));
         newTile.transform.parent = transform;
+        newTile.transform.position = snappedPosition;
         newTile.name = id;
         registry.Add(id, plane, newTile);
     }
@@ -51,6 +63,8 @@ public class TileSpawner : MonoBehaviour
         var (tile, tilePosition, plane, planePosition) = ((Tile, Vector3, Plane, Vector3))data;
 
         logger.Info($"Dragging tile to {planePosition}");
+
+        // While dragging, follow the input hit position directly
         tile.GameObject.transform.position = planePosition;
 
         // Optional: Align tile rotation with plane normal
@@ -65,6 +79,24 @@ public class TileSpawner : MonoBehaviour
     {
         Tile tile = (Tile)data;
         logger.Info("Releasing tile");
+
+        // Snap the tile to the nearest hex on the detected plane (if available)
+        var registered = registry.Get(tile.GameObject.name);
+        if (registered != null && registered.Plane != null)
+        {
+            Plane plane = registered.Plane;
+            Vector3 planeNormal = plane.surfaceInfo.Normal;
+            Vector3 planeOrigin = plane.surfaceInfo.Center;
+
+            Vector3 current = tile.GameObject.transform.position;
+            Vector2 hexCoord = HexGrid.WorldToHex(current, hexRadius, planeNormal, planeOrigin);
+            Vector3 snapped = HexGrid.HexToWorld(hexCoord, hexRadius, planeNormal, planeOrigin);
+            logger.Info($"Release snap: hexRadius={hexRadius} hexCoord={hexCoord} snappedLocal={snapped}");
+            float offset = Vector3.Dot(current - planeOrigin, planeNormal);
+            snapped += planeNormal * offset;
+            tile.GameObject.transform.position = snapped;
+            tile.GameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, planeNormal);
+        }
     }
 
 }
