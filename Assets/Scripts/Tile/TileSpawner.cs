@@ -33,7 +33,9 @@ public class TileSpawner : MonoBehaviour
         logger.Info($"Spawning tile at {planePosition}");
         // Snap position to hex grid oriented to the detected plane
         Vector3 planeNormal = plane.surfaceInfo.Normal;
-        Vector3 planeOrigin = plane.initialPosition;
+        // Vector3 planeOrigin = plane.initialPosition;
+        // Set origin to zero for now to have a consistent grid across planes
+        Vector3 planeOrigin = Vector3.zero;
 
         Vector2 hexCoord = HexGrid.WorldToHex(planePosition, hexRadius, planeNormal, planeOrigin);
         Vector3 snappedPosition = HexGrid.HexToWorld(hexCoord, hexRadius, planeNormal, planeOrigin);
@@ -68,7 +70,8 @@ public class TileSpawner : MonoBehaviour
         if (plane != null)
         {
             Vector3 planeNormal = plane.surfaceInfo.Normal;
-            Vector3 planeOrigin = plane.initialPosition;
+            // Vector3 planeOrigin = plane.initialPosition;
+            Vector3 planeOrigin = Vector3.zero;
 
             Vector2 hexCoord = HexGrid.WorldToHex(planePosition, hexRadius, planeNormal, planeOrigin);
             Vector3 snapped = HexGrid.HexToWorld(hexCoord, hexRadius, planeNormal, planeOrigin);
@@ -97,7 +100,8 @@ public class TileSpawner : MonoBehaviour
         {
             Plane plane = registered.Plane;
             Vector3 planeNormal = plane.surfaceInfo.Normal;
-            Vector3 planeOrigin = plane.initialPosition;
+            // Vector3 planeOrigin = plane.initialPosition;
+            Vector3 planeOrigin = Vector3.zero;
 
             Vector3 current = tile.GameObject.transform.position;
             Vector2 hexCoord = HexGrid.WorldToHex(current, hexRadius, planeNormal, planeOrigin);
