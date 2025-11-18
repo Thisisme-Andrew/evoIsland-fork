@@ -8,9 +8,13 @@ public class Plane
     public float creationTime;
     public IDetectedSurface surfaceInfo;
 
+    // The initial position of the plane when first detected. Does not change on updates.
+    public Vector3 initialPosition;
+
     public Plane(IDetectedSurface surface)
     {
         surfaceInfo = surface;
+        initialPosition = surface.Center;
         color = Random.ColorHSV();
         creationTime = Time.time;
     }
