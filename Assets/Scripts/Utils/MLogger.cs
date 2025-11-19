@@ -20,6 +20,12 @@ public class MLogger
         isLoggingEnabled = enable;
     }
 
+    public void Verbose(string message)
+    {
+        if (!isLoggingEnabled) return;
+        // Debug.Log($"[{tag}] {message}");
+    }
+
     public void Info(string message)
     {
         if (!isLoggingEnabled) return;
