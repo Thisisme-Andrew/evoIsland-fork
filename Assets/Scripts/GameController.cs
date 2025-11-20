@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class GameController : MonoBehaviour
 {
@@ -16,6 +17,8 @@ public class GameController : MonoBehaviour
     [SerializeField] private LayerMask surfaceLayerMask;
     public PlaneRegistry planeRegistry;
     public TileRegistry tileRegistry;
+
+    public ITransformer transformer = new ColorTransformer();
 
     private Tile currentlyHeldTile = null;
     private Vector3? currentlyHeldTileHitPoint = null;
@@ -35,6 +38,7 @@ public class GameController : MonoBehaviour
     void Start()
     {
         logger.Enable(true);
+        Signal.Subscribe("TileSpawned", OnTileSpawned);
         if (interactionHandler == null || interactionHandler.GetComponent<IInteraction>() == null)
         {
             Debug.LogError("Interaction handler not set or does not implement IInteraction.");
@@ -161,5 +165,13 @@ public class GameController : MonoBehaviour
 
         logger.Verbose("Raycast did not hit anything");
         return false;
+    }
+
+    private void OnTileSpawned(object data)
+    {
+        Tile t = (Tile)data;
+        GameObject g = t.GameObject;
+        Genome genome = t.genome;
+        transformer.Transform(genome, g);
     }
 }

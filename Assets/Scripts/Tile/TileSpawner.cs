@@ -70,7 +70,10 @@ public class TileSpawner : MonoBehaviour
             string genomesStr = string.Join(", ", nearbyTiles.ConvertAll(tile => tile.genome.ToString()));
             logger.Info("Found " + nearbyTiles.Count + " nearby tiles; Nearby genomes: " + genomesStr);
             logger.Info("Surface mutation profile: " + plane.environment.profile.ToString());
-            logger.Info("Assigned mixed genome: " + t.genome.ToString());}
+            logger.Info("Assigned mixed genome: " + t.genome.ToString());
+        }
+
+        Signal.Emit("TileSpawned", t);
     }
 
     void OnEditTile(object data)
