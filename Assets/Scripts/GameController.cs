@@ -90,12 +90,19 @@ public class GameController : MonoBehaviour
 
                 case InteractionType.Hold:
                     logger.Info("Hold interaction on tile detected: " + (hitTile != null) + " " + tileHitPoint.HasValue);
-                    if (hitTile != null && tileHitPoint.HasValue)
+                    // If we're not already holding a tile, pick one up from this raycast.
+                    // If we are already holding a tile, do NOT switch to a different tile
+                    // when the raycast hits another tile while dragging.
+                    if (currentlyHeldTile == null)
                     {
-                        currentlyHeldTile = hitTile;
-                        currentlyHeldTileHitPoint = tileHitPoint;
-                        currentlyHeldPlane = hitPlane;
+                        if (hitTile != null && tileHitPoint.HasValue)
+                        {
+                            currentlyHeldTile = hitTile;
+                            currentlyHeldTileHitPoint = tileHitPoint;
+                        }
                     }
+
+                    currentlyHeldPlane = hitPlane;
 
                     if (currentlyHeldTile != null && currentlyHeldTileHitPoint.HasValue)
                     {
@@ -113,14 +120,18 @@ public class GameController : MonoBehaviour
                         Signal.Emit("DragTile", (currentlyHeldTile, currentlyHeldTileHitPoint.Value, currentlyHeldPlane, targetPosition));
                     }
                     break;
+            }
+        }
 
-                case InteractionType.Release:
-                    logger.Info("Release interaction detected");
-                    Signal.Emit("ReleaseTile", currentlyHeldTile);
-                    currentlyHeldTile = null;
-                    currentlyHeldTileHitPoint = null;
-                    currentlyHeldPlane = null;
-                    break;
+        if (interactionEvent.type == InteractionType.Release)
+        {
+            logger.Info("Release interaction detected");
+            if (currentlyHeldTile != null && currentlyHeldPlane != null)
+            {
+                Signal.Emit("ReleaseTile", (currentlyHeldTile, currentlyHeldPlane));
+                currentlyHeldTile = null;
+                currentlyHeldTileHitPoint = null;
+                currentlyHeldPlane = null;
             }
         }
     }

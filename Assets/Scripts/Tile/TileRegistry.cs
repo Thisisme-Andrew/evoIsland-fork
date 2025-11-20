@@ -60,6 +60,12 @@ public class TileRegistry : MonoBehaviour
         return results;
     }
 
+    public Tile getTileAt(Vector3 worldPosition, float hexRadius, Plane plane)
+    {
+        var nearbyTiles = GetTilesNear(worldPosition, hexRadius, plane, range: 0);
+        return nearbyTiles.Count > 0 ? nearbyTiles[0] : null;
+    }
+
     // Hex axial distance using cube coordinates: dist = (|dq|+|dr|+|ds|)/2
     static int HexDistance(Vector2 a, Vector2 b)
     {

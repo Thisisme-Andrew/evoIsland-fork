@@ -47,7 +47,8 @@ public class TileSpawner : MonoBehaviour
 
         string id = System.Guid.NewGuid().ToString();
 
-        GameObject newTile = Instantiate(tilePrefab, snappedPosition, Quaternion.FromToRotation(Vector3.up, planeNormal));
+        Quaternion rot = GetAlignedRotation(planeNormal);
+        GameObject newTile = Instantiate(tilePrefab, snappedPosition, rot);
         newTile.transform.parent = transform;
         newTile.transform.position = snappedPosition;
         newTile.name = id;
@@ -101,26 +102,29 @@ public class TileSpawner : MonoBehaviour
             float offset = Vector3.Dot(planePosition - planeOrigin, planeNormal);
             snapped += planeNormal * offset;
 
+            // See if a tile already exists at this position on the plane
+            Tile existing = registry.getTileAt(snapped, hexRadius, plane);
+            if (existing != null && existing != tile)
+            {
+                logger.Info("Drag position occupied by another tile; not moving.");
+                return;
+            }
+
             tile.GameObject.transform.position = snapped;
-            tile.GameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, planeNormal);
-        }
-        else
-        {
-            // No plane info — just follow the raw hit position
-            tile.GameObject.transform.position = planePosition;
+            tile.GameObject.transform.rotation = GetAlignedRotation(planeNormal);
         }
     }
 
     void OnReleaseTile(object data)
     {
-        Tile tile = (Tile)data;
+        var (tile, plane) = ((Tile, Plane))data;
         logger.Info("Releasing tile");
 
         // Snap the tile to the nearest hex on the detected plane (if available)
         var registered = registry.Get(tile.GameObject.name);
         if (registered != null && registered.Plane != null)
         {
-            Plane plane = registered.Plane;
+            registered.SetPlane(plane);
             Vector3 planeNormal = plane.surfaceInfo.Normal;
             // Vector3 planeOrigin = plane.initialPosition;
             Vector3 planeOrigin = Vector3.zero;
@@ -132,8 +136,44 @@ public class TileSpawner : MonoBehaviour
             float offset = Vector3.Dot(current - planeOrigin, planeNormal);
             snapped += planeNormal * offset;
             tile.GameObject.transform.position = snapped;
-            tile.GameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, planeNormal);
+            tile.GameObject.transform.rotation = GetAlignedRotation(planeNormal);
         }
+    }
+
+    // Returns a rotation that aligns the prefab's local up to the plane normal and
+    // snaps the yaw around that normal to the nearest 60° so the hex's vertex
+    // (assumed to be along the prefab's forward) points consistently.
+    private Quaternion GetAlignedRotation(Vector3 planeNormal)
+    {
+        // Base rotation to align up->planeNormal
+        Quaternion baseRot = Quaternion.FromToRotation(Vector3.up, planeNormal);
+
+        // Choose a stable reference axis on the plane (prefer world forward, fallback to right)
+        Vector3 refAxis = Vector3.ProjectOnPlane(Vector3.forward, planeNormal);
+        if (refAxis.sqrMagnitude < 1e-6f)
+        {
+            refAxis = Vector3.ProjectOnPlane(Vector3.right, planeNormal);
+        }
+        refAxis.Normalize();
+
+        // Prefab's forward direction after applying base rotation
+        Vector3 prefabForward = baseRot * (tilePrefab != null ? tilePrefab.transform.forward : Vector3.forward);
+        Vector3 forwardProj = Vector3.ProjectOnPlane(prefabForward, planeNormal);
+        if (forwardProj.sqrMagnitude < 1e-6f)
+        {
+            // Nothing to snap to; return base rotation
+            return baseRot;
+        }
+        forwardProj.Normalize();
+
+        // Angle between reference axis and the prefab-forward projected onto the plane
+        float angle = Vector3.SignedAngle(refAxis, forwardProj, planeNormal);
+
+        // Snap to nearest 60 degrees so a vertex points up (pointy-top hexes have 60° symmetry)
+        float snapped = Mathf.Round(angle / 60f) * 60f;
+        float delta = snapped - angle;
+
+        return Quaternion.AngleAxis(delta, planeNormal) * baseRot;
     }
 
 }

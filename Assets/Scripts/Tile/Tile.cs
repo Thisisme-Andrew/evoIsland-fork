@@ -14,5 +14,9 @@ public class Tile
         genome = new Genome();
     }
 
+    public void SetPlane(Plane plane)
+    {
+        Plane = plane;
+    }
 
 }
