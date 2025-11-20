@@ -51,7 +51,26 @@ public class TileSpawner : MonoBehaviour
         newTile.transform.parent = transform;
         newTile.transform.position = snappedPosition;
         newTile.name = id;
-        registry.Add(id, plane, newTile);
+        Tile t = registry.Add(id, plane, newTile);
+
+        // Apply mutations to the tile if there are nearby tiles; otherwise, use a random genome
+        var nearbyTiles = registry.GetTilesNear(snappedPosition, hexRadius, plane, range: 1);
+        // Remove self from nearby tiles if present
+        nearbyTiles.RemoveAll(tile => tile == t);
+        if (nearbyTiles.Count == 0)
+        {
+            t.genome = Genome.CreateRandomGenome();
+            logger.Info("No nearby tiles found. Assigning random genome: " + t.genome.ToString());
+        } else
+        {
+            Genome mixed = plane.environment.Mix(nearbyTiles.ConvertAll(tile => tile.genome));
+            t.genome = mixed;
+
+            // Debug print
+            string genomesStr = string.Join(", ", nearbyTiles.ConvertAll(tile => tile.genome.ToString()));
+            logger.Info("Found " + nearbyTiles.Count + " nearby tiles; Nearby genomes: " + genomesStr);
+            logger.Info("Surface mutation profile: " + plane.environment.profile.ToString());
+            logger.Info("Assigned mixed genome: " + t.genome.ToString());}
     }
 
     void OnEditTile(object data)
