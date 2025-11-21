@@ -214,6 +214,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7635826562936255635, guid: 8219ca8a7a4ba4749b922ec521df9d38, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 8219ca8a7a4ba4749b922ec521df9d38, type: 3}
       propertyPath: m_Name
       value: hex
@@ -224,15 +228,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1151388028547126963, guid: 8219ca8a7a4ba4749b922ec521df9d38, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.1
+      value: 0.05
       objectReference: {fileID: 0}
     - target: {fileID: 1151388028547126963, guid: 8219ca8a7a4ba4749b922ec521df9d38, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.03
+      value: 0.02
       objectReference: {fileID: 0}
     - target: {fileID: 1151388028547126963, guid: 8219ca8a7a4ba4749b922ec521df9d38, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.1
+      value: 0.05
       objectReference: {fileID: 0}
     - target: {fileID: 1151388028547126963, guid: 8219ca8a7a4ba4749b922ec521df9d38, type: 3}
       propertyPath: m_LocalRotation.w
@@ -670,7 +674,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.2, y: 0.03, z: 0.18}
+  m_Size: {x: 0.09, y: 0.03, z: 0.09}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &823519973
 GameObject:
@@ -764,7 +768,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tilePrefab: {fileID: 756714249}
   registry: {fileID: 823519974}
-  hexRadius: 0.1
+  hexRadius: 0.05
 --- !u!1 &1198918114
 GameObject:
   m_ObjectHideFlags: 0

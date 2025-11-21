@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,13 +11,15 @@ public class Plane
 
     // The initial position of the plane when first detected. Does not change on updates.
     public Vector3 initialPosition;
+    public Environment environment;
 
     public Plane(IDetectedSurface surface)
     {
         surfaceInfo = surface;
         initialPosition = surface.Center;
-        color = Random.ColorHSV();
+        color = UnityEngine.Random.ColorHSV();
         creationTime = Time.time;
+        environment = new Environment(SurfaceMutationProfile.RandomProfile());
     }
 
     public void MergeFrom(Plane other)

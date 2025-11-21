@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class GameController : MonoBehaviour
 {
@@ -16,6 +17,8 @@ public class GameController : MonoBehaviour
     [SerializeField] private LayerMask surfaceLayerMask;
     public PlaneRegistry planeRegistry;
     public TileRegistry tileRegistry;
+
+    public ITransformer transformer = new ColorTransformer();
 
     private Tile currentlyHeldTile = null;
     private Vector3? currentlyHeldTileHitPoint = null;
@@ -35,6 +38,7 @@ public class GameController : MonoBehaviour
     void Start()
     {
         logger.Enable(true);
+        Signal.Subscribe("TileSpawned", OnTileSpawned);
         if (interactionHandler == null || interactionHandler.GetComponent<IInteraction>() == null)
         {
             Debug.LogError("Interaction handler not set or does not implement IInteraction.");
@@ -86,12 +90,19 @@ public class GameController : MonoBehaviour
 
                 case InteractionType.Hold:
                     logger.Info("Hold interaction on tile detected: " + (hitTile != null) + " " + tileHitPoint.HasValue);
-                    if (hitTile != null && tileHitPoint.HasValue)
+                    // If we're not already holding a tile, pick one up from this raycast.
+                    // If we are already holding a tile, do NOT switch to a different tile
+                    // when the raycast hits another tile while dragging.
+                    if (currentlyHeldTile == null)
                     {
-                        currentlyHeldTile = hitTile;
-                        currentlyHeldTileHitPoint = tileHitPoint;
-                        currentlyHeldPlane = hitPlane;
+                        if (hitTile != null && tileHitPoint.HasValue)
+                        {
+                            currentlyHeldTile = hitTile;
+                            currentlyHeldTileHitPoint = tileHitPoint;
+                        }
                     }
+
+                    currentlyHeldPlane = hitPlane;
 
                     if (currentlyHeldTile != null && currentlyHeldTileHitPoint.HasValue)
                     {
@@ -109,14 +120,18 @@ public class GameController : MonoBehaviour
                         Signal.Emit("DragTile", (currentlyHeldTile, currentlyHeldTileHitPoint.Value, currentlyHeldPlane, targetPosition));
                     }
                     break;
+            }
+        }
 
-                case InteractionType.Release:
-                    logger.Info("Release interaction detected");
-                    Signal.Emit("ReleaseTile", currentlyHeldTile);
-                    currentlyHeldTile = null;
-                    currentlyHeldTileHitPoint = null;
-                    currentlyHeldPlane = null;
-                    break;
+        if (interactionEvent.type == InteractionType.Release)
+        {
+            logger.Info("Release interaction detected");
+            if (currentlyHeldTile != null && currentlyHeldPlane != null)
+            {
+                Signal.Emit("ReleaseTile", (currentlyHeldTile, currentlyHeldPlane));
+                currentlyHeldTile = null;
+                currentlyHeldTileHitPoint = null;
+                currentlyHeldPlane = null;
             }
         }
     }
@@ -161,5 +176,13 @@ public class GameController : MonoBehaviour
 
         logger.Verbose("Raycast did not hit anything");
         return false;
+    }
+
+    private void OnTileSpawned(object data)
+    {
+        Tile t = (Tile)data;
+        GameObject g = t.GameObject;
+        Genome genome = t.genome;
+        transformer.Transform(genome, g);
     }
 }
