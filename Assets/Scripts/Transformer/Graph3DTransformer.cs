@@ -11,7 +11,7 @@ public class Graph3DTransformer : ITransformer
         Points = new List<Vector3>();
         Edges = new List<(int, int)>();
 
-        float[] vector = genome.genes;
+        float[] vector = genome.genes.ToArray();
 
         if (vector.Length < 3)
         {
