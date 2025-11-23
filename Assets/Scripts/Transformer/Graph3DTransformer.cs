@@ -19,6 +19,23 @@ public class Graph3DTransformer : ITransformer
 
         points = GeneratePoints(genes, MIN_POINTS, MAX_POINTS);
         connections = GenerateConnections(genes, points);
+
+        Debug.Log($"Genome was:");
+        for (int i = 0; i < genes.Length; i++)
+        {
+            Debug.Log($"genome{i}: {genes[i]}");
+        }
+
+        Debug.Log($"Generated {points.Count} points");
+        for (int i = 0; i < points.Count; i++)
+        {
+            Debug.Log($"P{i}: {points[i]}");
+        }
+        Debug.Log($"Generated {connections.Count} connections");
+        foreach (var conn in connections)
+        {
+            Debug.Log($"Connection: {conn.Item1} -> {conn.Item2}");
+        }
     }
     
     // Uses gene[0] to set number of points, use gene[1] to set the spreadfactor of each point generated
@@ -34,10 +51,9 @@ public class Graph3DTransformer : ITransformer
         for (int i = 0; i < nodeCount; i++)
         {
             // Three random high prime numbers to help create hashes
-            float hash = ((i + 1) * 73856093f) % 1f;
-            float hash2 = ((i + 1) * 19349663f) % 1f;
-            float hash3 = ((i + 1) * 83492791f) % 1f;
-
+            float hash = Mathf.Abs(((i + 1) * 73856093f) % 1000000) / 1000000;
+            float hash2 = Mathf.Abs(((i + 1) * 19349663f) % 1000000) / 1000000;
+            
             Vector3 pos = new Vector3(
                 (hash - 0.5f) * spreadFactor * 2f,
                 i * 0.5f,
@@ -71,7 +87,9 @@ public class Graph3DTransformer : ITransformer
             for (int j = i + 2; j < points.Count; j++)
             {
                 // random high prime numbers to help create hash
-                float connectionHash = ((i * 1000 + j) * 73856093f) % 1f;
+                int hashValue = (i * 1000 + j) * 73856093;
+                float connectionHash = Mathf.Abs(hashValue % 1000000) / 1000000f;
+
                 if (connectionHash < branchProbability)
                 {
                     connections.Add((i, j));
