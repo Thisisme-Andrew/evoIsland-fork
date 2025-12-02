@@ -18,7 +18,7 @@ public class GameController : MonoBehaviour
     public PlaneRegistry planeRegistry;
     public TileRegistry tileRegistry;
 
-    public ITransformer transformer = new ColorTransformer();
+    public ITransformer[] transformers = {new ColorTransformer(), new Graph3DTransformer()};
 
     private Tile currentlyHeldTile = null;
     private Vector3? currentlyHeldTileHitPoint = null;
@@ -183,6 +183,9 @@ public class GameController : MonoBehaviour
         Tile t = (Tile)data;
         GameObject g = t.GameObject;
         Genome genome = t.genome;
-        transformer.Transform(genome, g);
+        foreach (var transformer in transformers)
+        {
+            transformer.Transform(genome, g);
+        }
     }
 }
